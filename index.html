@@ -43,7 +43,7 @@
         <h1>Trading Journal</h1>
         <div class="subtitle">Registro de operaciones</div>
       </div>
-      <div style="margin-left:auto" class="small muted">V1.4.3</div>
+      <div style="margin-left:auto" class="small muted">V1.4.1</div>
     </header>
 
     <div class="toolbar">
@@ -157,6 +157,7 @@ const modal = document.getElementById('modal');
 const closeModal = document.getElementById('closeModal');
 const form = document.getElementById('form');
 const tbody = document.getElementById('tbody');
+const exportCSV = document.getElementById('exportCSV');
 
 const operador = document.getElementById('operador');
 const divisaSelect = document.getElementById('divisa');
@@ -170,14 +171,7 @@ const comision = document.getElementById('comision');
 const beneficioNeto = document.getElementById('beneficio_neto');
 const porcentaje = document.getElementById('porcentaje');
 
-let editingId = null; // <--- ID de la operación que se está editando
-
-newBtn.addEventListener('click', ()=>{ 
-  modal.style.display='flex'; 
-  form.reset(); 
-  editingId = null;
-  document.getElementById('modalTitle').textContent = "Nueva operación";
-});
+newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
 closeModal.addEventListener('click', ()=> modal.style.display='none');
 modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
 
@@ -190,6 +184,7 @@ function formatFecha(fecha) {
   return `${dia}/${mes}/${año}`;
 }
 
+// Funciones de formato
 function formatUSD(valor){
   if(valor==null) return '';
   if(valor<0) return `<span style="color:#fb7185">-$${Math.abs(valor).toFixed(2)}</span>`;
@@ -226,70 +221,108 @@ async function cargarOperaciones(){
       <td>${formatUSD(op.beneficio_neto)}</td>
       <td>${formatPorcentaje(op.porcentaje)}</td>
       <td>${op.comentario||''}</td>
-      <td>${op.captura_url ? `<a href="${op.captura_url}" target="_blank">Ver</a>` : ''}</td>
-      <td>
-        <button class="editBtn" data-id="${op.id}" style="
-          background:#10b981; 
-          color:white; 
-          border:none; 
-          border-radius:6px; 
-          width:28px; 
-          height:28px; 
-          font-weight:bold; 
-          cursor:pointer;
-          margin-right:4px;
-        ">✎</button>
-        <button class="deleteBtn" data-id="${op.id}" style="
-          background:#2563eb; 
-          color:white; 
-          border:none; 
-          border-radius:6px; 
-          width:28px; 
-          height:28px; 
-          font-weight:bold; 
-          cursor:pointer;
-        ">×</button>
-      </td>
+      <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
+      <td><button class="deleteBtn" data-id="${op.id}">Eliminar</button></td>
     </tr>`;
   });
 }
 
-// --- Evento para editar y eliminar ---
-tbody.addEventListener('click', async (e)=>{
-  const id = e.target.dataset.id;
-  if(e.target.classList.contains('deleteBtn')){
-    if(confirm("¿Estás seguro de eliminar esta operación?")){
-      const {error} = await db.from('operaciones').delete().eq('id', Number(id));
-      if(error){ alert("Error eliminando: "+error.message); return; }
-      cargarOperaciones();
-    }
-  }
-  if(e.target.classList.contains('editBtn')){
-    editingId = Number(id);
-    const {data,error} = await db.from('operaciones').select('*').eq('id', editingId).single();
-    if(error){ alert("Error cargando operación: "+error.message); return; }
-    document.getElementById('modalTitle').textContent = "Editar operación";
-    operador.value = data.operador;
-    document.getElementById('fecha').value = data.fecha;
-    divisaSelect.value = data.divisa;
-    tipo_cuenta.value = data.tipo_cuenta;
-    tipo_orden.value = data.tipo_orden;
-    lotaje.value = data.lotaje;
-    precioEntrada.value = data.precio_entrada;
-    precioSalida.value = data.precio_salida;
-    beneficioBruto.value = data.beneficio_bruto;
-    comision.value = data.comision;
-    beneficioNeto.value = data.beneficio_neto;
-    porcentaje.value = data.porcentaje;
-    document.getElementById('comentario').value = data.comentario;
-    document.getElementById('captura_url').value = data.captura_url;
-    modal.style.display='flex';
+// Decimales por divisa
+const ejemploPorDivisa = {
+  'EUR/USD': {ej:'1.15364', dec:5},
+  'GBP/USD': {ej:'1.30875', dec:5},
+  'USD/JPY': {ej:'145.432', dec:3},
+  'XAU/USD': {ej:'4016.98', dec:2}
+};
+
+// Configuración pips y valor por lote
+const configDivisa = {
+  'EUR/USD': {pip:0.0001, valorPorLote:10},
+  'GBP/USD': {pip:0.0001, valorPorLote:10},
+  'USD/JPY': {pip:0.01, valorPorLote:9.13},
+  'XAU/USD': {pip:0.1, valorPorLote:10}
+};
+
+// Comisiones
+const comisionPorCuenta = {
+  'Apollo':7,
+  'Personal':6
+};
+
+divisaSelect.addEventListener('change', ()=>{
+  const div = divisaSelect.value;
+  if(ejemploPorDivisa[div]){
+    const {ej, dec} = ejemploPorDivisa[div];
+    precioEntrada.placeholder = 'ej. '+ej;
+    precioSalida.placeholder = 'ej. '+ej;
+    precioEntrada.dataset.dec = dec;
+    precioSalida.dataset.dec = dec;
+    let step = '1';
+    if(dec>0) step = '0.' + '0'.repeat(dec-1)+'1';
+    precioEntrada.step = step;
+    precioSalida.step = step;
+    precioEntrada.value=''; precioSalida.value=''; beneficioBruto.value=''; comision.value=''; beneficioNeto.value=''; porcentaje.value='';
   }
 });
 
-// --- Submit del formulario ---
+function limitarInput(input){
+  input.addEventListener('input', ()=>{
+    const dec = parseInt(input.dataset.dec||0);
+    if(!dec) return;
+    let val = input.value;
+    if(val.includes('.')){
+      let [entero, decimal] = val.split('.');
+      decimal = decimal.slice(0, dec);
+      input.value = entero + (decimal ? '.'+decimal : '');
+    }
+    calcularAutomatico();
+  });
+}
+limitarInput(precioEntrada);
+limitarInput(precioSalida);
+lotaje.addEventListener('input', calcularAutomatico);
+tipo_cuenta.addEventListener('change', calcularAutomatico);
+tipo_orden.addEventListener('change', calcularAutomatico);
+
+function calcularAutomatico(){
+  const div = divisaSelect.value;
+  const entrada = parseFloat(precioEntrada.value);
+  const salida = parseFloat(precioSalida.value);
+  const lts = parseFloat(lotaje.value);
+  const orden = tipo_orden.value;
+  const cuenta = tipo_cuenta.value;
+  if(!div || isNaN(entrada) || isNaN(salida) || isNaN(lts) || !orden || !cuenta) return;
+
+  const {pip, valorPorLote} = configDivisa[div];
+
+  let bruto = ((orden==='Buy') ? (salida-entrada) : (entrada-salida)) / pip * valorPorLote * lts;
+  beneficioBruto.value = bruto.toFixed(2);
+
+  let com = (comisionPorCuenta[cuenta] || 0) * lts;
+  comision.value = com.toFixed(2);
+
+  const neto = bruto - com;
+  beneficioNeto.value = neto.toFixed(2);
+
+  const balance = cuenta==='Apollo' ? 5000 : 1000;
+  porcentaje.value = ((neto / balance)*100).toFixed(2);
+}
+
 form.addEventListener('submit', async (e)=>{
   e.preventDefault();
+  const dec = parseInt(precioEntrada.dataset.dec||0);
+  if(dec){
+    const regex = new RegExp(`^\\d+(\\.\\d{${dec}})$`);
+    if(!regex.test(precioEntrada.value)){
+      alert(`Precio Entrada debe tener exactamente ${dec} decimales`);
+      return;
+    }
+    if(!regex.test(precioSalida.value)){
+      alert(`Precio Salida debe tener exactamente ${dec} decimales`);
+      return;
+    }
+  }
+
   const data = {
     operador: operador.value,
     fecha: document.getElementById("fecha").value,
@@ -306,18 +339,21 @@ form.addEventListener('submit', async (e)=>{
     comentario: document.getElementById("comentario").value,
     captura_url: document.getElementById("captura_url").value
   };
-
-  if(editingId){ 
-    const {error} = await db.from('operaciones').update(data).eq('id', editingId);
-    if(error){ alert("Error actualizando: "+error.message); return; }
-    editingId = null;
-  } else {
-    const {error} = await db.from('operaciones').insert(data);
-    if(error){ alert("Error guardando: "+error.message); return; }
-  }
-
+  const {error} = await db.from('operaciones').insert(data);
+  if(error){ alert("Error guardando: "+error.message); return; }
   modal.style.display='none';
   cargarOperaciones();
+});
+
+tbody.addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('deleteBtn')){
+    const id = e.target.dataset.id;
+    if(confirm("¿Estás seguro de eliminar esta operación?")){
+      const {error} = await db.from('operaciones').delete().eq('id', Number(id));
+      if(error){ alert("Error eliminando: "+error.message); return; }
+      cargarOperaciones();
+    }
+  }
 });
 
 cargarOperaciones();
