@@ -431,7 +431,7 @@ function exportarCSV() {
   // Encabezados
   const headers = [
     "ID","Trader","Fecha","Divisa","Cuenta","Orden","Lotaje",
-    "Entrada","Salida","Bruto (USD)","Comisión (USD)","Neto (USD)","Porcentaje","Comentario","Captura"
+    "Entrada","Salida","Bruto (USD)","Comision (USD)","Neto (USD)","Porcentaje","Comentario","Captura"
   ];
   csv.push(headers.join(","));
 
@@ -460,7 +460,7 @@ function exportarCSV() {
 
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", "operaciones.csv");
+  link.setAttribute("download", "Operaciones.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -470,4 +470,5 @@ cargarOperaciones();
 </script>
 </body>
 </html>
+
 
