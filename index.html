@@ -5,208 +5,187 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trading Journal</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #121212;
-      color: white;
-      margin: 20px;
+    :root {
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-    h1 { text-align: center; }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      border-radius: 4px;
-      border: none;
-    }
-    button {
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      cursor: pointer;
-      background: #4caf50;
-      border: none;
-      color: white;
-      font-size: 16px;
-      border-radius: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 25px;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background: #333;
-    }
+    *{box-sizing:border-box}
+    body{margin:0; background:linear-gradient(180deg,#071025 0%, #071a2a 100%); color:#e6eef6;}
+    .container{max-width:1100px; margin:28px auto; padding:20px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted); font-size:13px}
+
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+    button{background:var(--accent);border:0;padding:8px 12px;border-radius:10px;color:#042027;cursor:pointer;font-weight:600}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
+    button.ghost{background:transparent;border:0;color:var(--muted)}
+
+    input, select, textarea{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:inherit;width:100%;}
+
+    .card{background:var(--card); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(2,6,23,0.6)}
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    thead th{ text-align:left; padding:12px 10px; color:var(--muted); font-weight:600; font-size:12px}
+    tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+    .long{width:220px}
+
+    @media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px}
+    .modal{width:100%;max-width:720px;background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.02));border-radius:12px;padding:16px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media (max-width:600px){.form-grid{grid-template-columns:1fr}}
   </style>
 </head>
-
 <body>
-  <h1>Trading Journal</h1>
-
   <div class="container">
-    <h2>Registrar Operación</h2>
+    <header>
+      <div>
+        <h1>Trading Journal</h1>
+        <div class="subtitle">Registro de operaciones</div>
+      </div>
+      <div style="margin-left:auto" class="small muted">V 1.0</div>
+    </header>
 
-    <label>Operador</label>
-    <input id="operador" type="text">
+    <div class="toolbar">
+      <button id="newBtn">+ Nueva operación</button>
+      <button id="exportCSV" class="secondary">Exportar CSV</button>
+      <button id="exportJSON" class="secondary">Exportar JSON</button>
+    </div>
 
-    <label>Fecha</label>
-    <input id="fecha" type="date">
+    <div class="card">
+      <table id="journalTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Operador</th>
+            <th>Fecha</th>
+            <th>Divisa</th>
+            <th>Tipo Cuenta</th>
+            <th>Orden</th>
+            <th>Lotaje</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Bruto</th>
+            <th>Comisión</th>
+            <th>Neto</th>
+            <th>%</th>
+            <th>Comentario</th>
+            <th>Captura</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
 
-    <label>Divisa</label>
-    <input id="divisa" type="text">
-
-    <label>Tipo de Cuenta</label>
-    <input id="tipo_cuenta" type="text">
-
-    <label>Tipo de Orden</label>
-    <select id="tipo_orden">
-      <option value="Buy">Buy</option>
-      <option value="Sell">Sell</option>
-    </select>
-
-    <label>Lotaje</label>
-    <input id="lotaje" type="number" step="0.01">
-
-    <label>Precio de Entrada</label>
-    <input id="precio_entrada" type="number" step="0.0001">
-
-    <label>Precio de Salida</label>
-    <input id="precio_salida" type="number" step="0.0001">
-
-    <label>Beneficio Bruto</label>
-    <input id="beneficio_bruto" type="number" step="0.01">
-
-    <label>Comisión</label>
-    <input id="comision" type="number" step="0.01">
-
-    <label>Beneficio Neto</label>
-    <input id="beneficio_neto" type="number" step="0.01">
-
-    <label>Porcentaje</label>
-    <input id="porcentaje" type="number" step="0.01">
-
-    <label>Comentario</label>
-    <textarea id="comentario"></textarea>
-
-    <label>Captura URL</label>
-    <input id="captura_url" type="text">
-
-    <button onclick="guardarOperacion()">Guardar Operación</button>
-
-    <h2>Operaciones Registradas</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Operador</th>
-          <th>Fecha</th>
-          <th>Divisa</th>
-          <th>Tipo Cuenta</th>
-          <th>Orden</th>
-          <th>Lotaje</th>
-          <th>Entrada</th>
-          <th>Salida</th>
-          <th>Bruto</th>
-          <th>Comisión</th>
-          <th>Neto</th>
-          <th>%</th>
-          <th>Comentario</th>
-          <th>Captura</th>
-        </tr>
-      </thead>
-      <tbody id="tabla"></tbody>
-    </table>
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong id="modalTitle">Nueva operación</strong>
+        <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
+      </div>
+      <form id="form">
+        <div class="form-grid">
+          <label>Operador <input id="operador" type="text" required></label>
+          <label>Fecha <input id="fecha" type="date" required></label>
+          <label>Divisa <input id="divisa" type="text"></label>
+          <label>Tipo Cuenta <input id="tipo_cuenta" type="text"></label>
+          <label>Tipo Orden 
+            <select id="tipo_orden">
+              <option value="Buy">Buy</option>
+              <option value="Sell">Sell</option>
+            </select>
+          </label>
+          <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
+          <label>Precio Entrada <input id="precio_entrada" type="number" step="0.0001"></label>
+          <label>Precio Salida <input id="precio_salida" type="number" step="0.0001"></label>
+          <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01"></label>
+          <label>Comisión <input id="comision" type="number" step="0.01"></label>
+          <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01"></label>
+          <label>Porcentaje <input id="porcentaje" type="number" step="0.01"></label>
+          <label>Comentario <textarea id="comentario"></textarea></label>
+          <label>Captura URL <input id="captura_url" type="text"></label>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+          <button type="submit">Guardar Operación</button>
+        </div>
+      </form>
+    </div>
   </div>
 
 <script>
   // --- CONFIGURACIÓN SUPABASE ---
   const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
   const SUPABASE_KEY = "sb_publishable_0Ewu4iXl2LxOj-z_-RvgdA_6CeL-UyQ";
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // --- GUARDAR UNA OPERACIÓN ---
-  async function guardarOperacion() {
+  const newBtn = document.getElementById('newBtn');
+  const modal = document.getElementById('modal');
+  const closeModal = document.getElementById('closeModal');
+  const form = document.getElementById('form');
+  const tbody = document.getElementById('tbody');
+
+  newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
+  closeModal.addEventListener('click', ()=> modal.style.display='none');
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
+
+  async function cargarOperaciones(){
+    const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
+    if(error){ alert("Error cargando: "+error.message); return; }
+    tbody.innerHTML = '';
+    if(data.length===0){ tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; return; }
+    data.forEach(op=>{
+      tbody.innerHTML += `<tr>
+        <td>${op.id}</td>
+        <td>${op.operador||''}</td>
+        <td>${op.fecha||''}</td>
+        <td>${op.divisa||''}</td>
+        <td>${op.tipo_cuenta||''}</td>
+        <td>${op.tipo_orden||''}</td>
+        <td>${op.lotaje||''}</td>
+        <td>${op.precio_entrada||''}</td>
+        <td>${op.precio_salida||''}</td>
+        <td>${op.beneficio_bruto||''}</td>
+        <td>${op.comision||''}</td>
+        <td>${op.beneficio_neto||''}</td>
+        <td>${op.porcentaje||''}</td>
+        <td>${op.comentario||''}</td>
+        <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
+      </tr>`;
+    });
+  }
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
     const data = {
       operador: document.getElementById("operador").value,
       fecha: document.getElementById("fecha").value,
       divisa: document.getElementById("divisa").value,
       tipo_cuenta: document.getElementById("tipo_cuenta").value,
       tipo_orden: document.getElementById("tipo_orden").value,
-      lotaje: document.getElementById("lotaje").value,
-      precio_entrada: document.getElementById("precio_entrada").value,
-      precio_salida: document.getElementById("precio_salida").value,
-      beneficio_bruto: document.getElementById("beneficio_bruto").value,
-      comision: document.getElementById("comision").value,
-      beneficio_neto: document.getElementById("beneficio_neto").value,
-      porcentaje: document.getElementById("porcentaje").value,
+      lotaje: parseFloat(document.getElementById("lotaje").value)||null,
+      precio_entrada: parseFloat(document.getElementById("precio_entrada").value)||null,
+      precio_salida: parseFloat(document.getElementById("precio_salida").value)||null,
+      beneficio_bruto: parseFloat(document.getElementById("beneficio_bruto").value)||null,
+      comision: parseFloat(document.getElementById("comision").value)||null,
+      beneficio_neto: parseFloat(document.getElementById("beneficio_neto").value)||null,
+      porcentaje: parseFloat(document.getElementById("porcentaje").value)||null,
       comentario: document.getElementById("comentario").value,
       captura_url: document.getElementById("captura_url").value
     };
-
-    const { error } = await db.from("operaciones").insert(data);
-
-    if (error) {
-      alert("Error guardando: " + error.message);
-      return;
-    }
-
-    alert("Operación registrada");
+    const {error} = await db.from('operaciones').insert(data);
+    if(error){ alert("Error guardando: "+error.message); return; }
+    modal.style.display='none';
     cargarOperaciones();
-  }
-
-  // --- CARGAR TABLA ---
-  async function cargarOperaciones() {
-    const { data, error } = await db.from("operaciones").select("*").order("id", { ascending: false });
-
-    if (error) {
-      alert("Error cargando: " + error.message);
-      return;
-    }
-
-    const tbody = document.getElementById("tabla");
-    tbody.innerHTML = "";
-
-    data.forEach(op => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${op.id}</td>
-          <td>${op.operador || ""}</td>
-          <td>${op.fecha || ""}</td>
-          <td>${op.divisa || ""}</td>
-          <td>${op.tipo_cuenta || ""}</td>
-          <td>${op.tipo_orden || ""}</td>
-          <td>${op.lotaje || ""}</td>
-          <td>${op.precio_entrada || ""}</td>
-          <td>${op.precio_salida || ""}</td>
-          <td>${op.beneficio_bruto || ""}</td>
-          <td>${op.comision || ""}</td>
-          <td>${op.beneficio_neto || ""}</td>
-          <td>${op.porcentaje || ""}</td>
-          <td>${op.comentario || ""}</td>
-          <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
-        </tr>
-      `;
-    });
-  }
+  });
 
   cargarOperaciones();
 </script>
-
 </body>
 </html>
-
