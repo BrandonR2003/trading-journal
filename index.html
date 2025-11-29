@@ -185,15 +185,22 @@ function formatFecha(fecha) {
   return `${dia}/${mes}/${año}`;
 }
 
-// --- NUEVAS FUNCIONES DE FORMATO ---
+// Formatear dólares con negativo en rojo
 function formatDinero(valor){
   if(valor==null) return '';
-  return '$' + parseFloat(valor).toFixed(2);
+  const negativo = valor < 0;
+  const absValor = Math.abs(valor).toFixed(2);
+  if(negativo){
+    return `<span style="color:#fb7185">-$${absValor}</span>`;
+  } else {
+    return `$${absValor}`;
+  }
 }
 
+// Formatear porcentaje
 function formatPorcentaje(valor){
   if(valor==null) return '';
-  return parseFloat(valor).toFixed(2) + '%';
+  return `${valor.toFixed(2)}%`;
 }
 
 async function cargarOperaciones(){
