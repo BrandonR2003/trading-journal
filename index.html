@@ -311,7 +311,7 @@ tbody.addEventListener('click', async (e)=>{
   if(e.target.classList.contains('deleteBtn')){
     const id = e.target.dataset.id;
     if(confirm("¿Estás seguro de eliminar esta operación?")){
-      const {error} = await db.from('operaciones').delete().eq('id', id);
+      const {error} = await db.from('operaciones').delete().eq('id', Number(id));
       if(error){ alert("Error eliminando: "+error.message); return; }
       cargarOperaciones();
     }
@@ -322,3 +322,4 @@ cargarOperaciones();
 </script>
 </body>
 </html>
+
