@@ -43,7 +43,7 @@
         <h1>Trading Journal</h1>
         <div class="subtitle">Registro de operaciones</div>
       </div>
-      <div style="margin-left:auto" class="small muted">V1.4.2</div>
+      <div style="margin-left:auto" class="small muted">V1.4.3</div>
     </header>
 
     <div class="toolbar">
@@ -157,7 +157,6 @@ const modal = document.getElementById('modal');
 const closeModal = document.getElementById('closeModal');
 const form = document.getElementById('form');
 const tbody = document.getElementById('tbody');
-const exportCSV = document.getElementById('exportCSV');
 
 const operador = document.getElementById('operador');
 const divisaSelect = document.getElementById('divisa');
@@ -171,7 +170,14 @@ const comision = document.getElementById('comision');
 const beneficioNeto = document.getElementById('beneficio_neto');
 const porcentaje = document.getElementById('porcentaje');
 
-newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
+let editingId = null; // <--- ID de la operación que se está editando
+
+newBtn.addEventListener('click', ()=>{ 
+  modal.style.display='flex'; 
+  form.reset(); 
+  editingId = null;
+  document.getElementById('modalTitle').textContent = "Nueva operación";
+});
 closeModal.addEventListener('click', ()=> modal.style.display='none');
 modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
 
@@ -184,7 +190,6 @@ function formatFecha(fecha) {
   return `${dia}/${mes}/${año}`;
 }
 
-// Funciones de formato
 function formatUSD(valor){
   if(valor==null) return '';
   if(valor<0) return `<span style="color:#fb7185">-$${Math.abs(valor).toFixed(2)}</span>`;
@@ -223,26 +228,99 @@ async function cargarOperaciones(){
       <td>${op.comentario||''}</td>
       <td>${op.captura_url ? `<a href="${op.captura_url}" target="_blank">Ver</a>` : ''}</td>
       <td>
-  <button class="deleteBtn" data-id="${op.id}" style="
-    background:#2563eb; 
-    color:white; 
-    border:none; 
-    border-radius:6px; 
-    width:28px; 
-    height:28px; 
-    font-weight:bold; 
-    cursor:pointer;
-  ">×</button>
-</td>
+        <button class="editBtn" data-id="${op.id}" style="
+          background:#10b981; 
+          color:white; 
+          border:none; 
+          border-radius:6px; 
+          width:28px; 
+          height:28px; 
+          font-weight:bold; 
+          cursor:pointer;
+          margin-right:4px;
+        ">✎</button>
+        <button class="deleteBtn" data-id="${op.id}" style="
+          background:#2563eb; 
+          color:white; 
+          border:none; 
+          border-radius:6px; 
+          width:28px; 
+          height:28px; 
+          font-weight:bold; 
+          cursor:pointer;
+        ">×</button>
+      </td>
     </tr>`;
   });
 }
 
-// El resto del código se mantiene igual que tu versión anterior
-// (decimales por divisa, configDivisa, comisiones, eventos, cálculos, submit del formulario, etc.)
+// --- Evento para editar y eliminar ---
+tbody.addEventListener('click', async (e)=>{
+  const id = e.target.dataset.id;
+  if(e.target.classList.contains('deleteBtn')){
+    if(confirm("¿Estás seguro de eliminar esta operación?")){
+      const {error} = await db.from('operaciones').delete().eq('id', Number(id));
+      if(error){ alert("Error eliminando: "+error.message); return; }
+      cargarOperaciones();
+    }
+  }
+  if(e.target.classList.contains('editBtn')){
+    editingId = Number(id);
+    const {data,error} = await db.from('operaciones').select('*').eq('id', editingId).single();
+    if(error){ alert("Error cargando operación: "+error.message); return; }
+    document.getElementById('modalTitle').textContent = "Editar operación";
+    operador.value = data.operador;
+    document.getElementById('fecha').value = data.fecha;
+    divisaSelect.value = data.divisa;
+    tipo_cuenta.value = data.tipo_cuenta;
+    tipo_orden.value = data.tipo_orden;
+    lotaje.value = data.lotaje;
+    precioEntrada.value = data.precio_entrada;
+    precioSalida.value = data.precio_salida;
+    beneficioBruto.value = data.beneficio_bruto;
+    comision.value = data.comision;
+    beneficioNeto.value = data.beneficio_neto;
+    porcentaje.value = data.porcentaje;
+    document.getElementById('comentario').value = data.comentario;
+    document.getElementById('captura_url').value = data.captura_url;
+    modal.style.display='flex';
+  }
+});
+
+// --- Submit del formulario ---
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const data = {
+    operador: operador.value,
+    fecha: document.getElementById("fecha").value,
+    divisa: divisaSelect.value,
+    tipo_cuenta: tipo_cuenta.value,
+    tipo_orden: tipo_orden.value,
+    lotaje: parseFloat(lotaje.value)||null,
+    precio_entrada: parseFloat(precioEntrada.value)||null,
+    precio_salida: parseFloat(precioSalida.value)||null,
+    beneficio_bruto: parseFloat(beneficioBruto.value)||null,
+    comision: parseFloat(comision.value)||null,
+    beneficio_neto: parseFloat(beneficioNeto.value)||null,
+    porcentaje: parseFloat(porcentaje.value)||null,
+    comentario: document.getElementById("comentario").value,
+    captura_url: document.getElementById("captura_url").value
+  };
+
+  if(editingId){ 
+    const {error} = await db.from('operaciones').update(data).eq('id', editingId);
+    if(error){ alert("Error actualizando: "+error.message); return; }
+    editingId = null;
+  } else {
+    const {error} = await db.from('operaciones').insert(data);
+    if(error){ alert("Error guardando: "+error.message); return; }
+  }
+
+  modal.style.display='none';
+  cargarOperaciones();
+});
 
 cargarOperaciones();
 </script>
 </body>
 </html>
-
