@@ -42,7 +42,7 @@
         <h1>Trading Journal</h1>
         <div class="subtitle">Registro de operaciones</div>
       </div>
-      <div style="margin-left:auto" class="small muted">V1.5</div>
+      <div style="margin-left:auto" class="small muted">V1.4</div>
     </header>
 
     <div class="toolbar">
@@ -112,16 +112,16 @@
           </label>
 
           <label>
-            Tipo Cuenta
+            Cuenta
             <select id="tipo_cuenta">
-              <option value="">Selecciona tipo</option>
+              <option value="">Selecciona cuenta</option>
               <option value="Apollo">Apollo</option>
               <option value="Personal">Personal</option>
             </select>
           </label>
 
           <label>
-            Tipo Orden
+            Tipo de Orden
             <select id="tipo_orden">
               <option value="Buy">Buy</option>
               <option value="Sell">Sell</option>
@@ -130,8 +130,8 @@
 
           <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
 
-          <label>Precio Entrada <input id="precio_entrada" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
-          <label>Precio Salida <input id="precio_salida" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
+          <label>Precio de Entrada <input id="precio_entrada" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
+          <label>Precio de Salida <input id="precio_salida" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
 
           <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01" readonly></label>
           <label>Comisión <input id="comision" type="number" step="0.01" readonly></label>
@@ -355,4 +355,5 @@ cargarOperaciones();
 </script>
 </body>
 </html>
+
 
