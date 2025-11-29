@@ -1,313 +1,266 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trading Journal</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
-      --glass: rgba(15,23,36,0.95);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    body{margin:0; background:linear-gradient(180deg,#071025 0%, #071a2a 100%); color:#e6eef6;}
-    .container{max-width:1100px; margin:28px auto; padding:20px}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-    h1{font-size:20px;margin:0}
-    .subtitle{color:var(--muted); font-size:13px}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trading Journal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
+  --glass: rgba(15,23,36,0.95);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box}
+body{margin:0; background:linear-gradient(180deg,#071025 0%, #071a2a 100%); color:#e6eef6;}
+.container{max-width:1100px; margin:28px auto; padding:20px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+h1{font-size:20px;margin:0}
+.subtitle{color:var(--muted); font-size:13px}
 
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-    button{background:var(--accent);border:0;padding:8px 12px;border-radius:10px;color:#042027;cursor:pointer;font-weight:600}
-    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
-    button.ghost{background:transparent;border:0;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+button{background:var(--accent);border:0;padding:8px 12px;border-radius:10px;color:#042027;cursor:pointer;font-weight:600}
+button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
+button.ghost{background:transparent;border:0;color:var(--muted)}
 
-    input, select, textarea{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:inherit;width:100%;}
+input, select, textarea{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:inherit;width:100%;}
 
-    .card{background:var(--card); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(2,6,23,0.6)}
-    table{width:100%; border-collapse:collapse; font-size:13px}
-    thead th{ text-align:left; padding:12px 10px; color:var(--muted); font-weight:600; font-size:12px}
-    tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
-    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
-    .long{width:220px}
+.card{background:var(--card); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(2,6,23,0.6)}
+table{width:100%; border-collapse:collapse; font-size:13px}
+thead th{ text-align:left; padding:12px 10px; color:var(--muted); font-weight:600; font-size:12px}
+tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
+.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+.long{width:220px}
 
-    @media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
+@media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
 
-    .modal-backdrop{position:fixed;inset:0;background:var(--glass);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
-    .modal{width:100%;max-width:720px;background:var(--glass);border-radius:12px;padding:16px;backdrop-filter: blur(6px);}
-    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    @media (max-width:600px){.form-grid{grid-template-columns:1fr}}
-  </style>
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
+.modal{width:100%;max-width:720px;background:var(--glass);border-radius:12px;padding:16px;backdrop-filter: blur(6px);}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (max-width:600px){.form-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div>
-        <h1>Trading Journal</h1>
-        <div class="subtitle">Registro de operaciones</div>
-      </div>
-      <div style="margin-left:auto" class="small muted">V 1.0</div>
-    </header>
-
-    <div class="toolbar">
-      <button id="newBtn">+ Nueva operación</button>
-      <button id="exportCSV" class="secondary">Exportar CSV</button>
+<div class="container">
+  <header>
+    <div>
+      <h1>Trading Journal</h1>
+      <div class="subtitle">Registro de operaciones</div>
     </div>
+    <div style="margin-left:auto" class="small muted">V 1.0</div>
+  </header>
 
-    <div class="card">
-      <table id="journalTable">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Operador</th>
-            <th>Fecha</th>
-            <th>Divisa</th>
-            <th>Tipo Cuenta</th>
-            <th>Orden</th>
-            <th>Lotaje</th>
-            <th>Entrada</th>
-            <th>Salida</th>
-            <th>Bruto</th>
-            <th>Comisión</th>
-            <th>Neto</th>
-            <th>%</th>
-            <th>Comentario</th>
-            <th>Captura</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+  <div class="toolbar">
+    <button id="newBtn">+ Nueva operación</button>
+    <button id="exportCSV" class="secondary">Exportar CSV</button>
   </div>
 
-  <!-- Modal -->
-  <div class="modal-backdrop" id="modal">
-    <div class="modal">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong id="modalTitle">Nueva operación</strong>
-        <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
-      </div>
-      <form id="form">
-        <div class="form-grid">
-          <label>
-            Operador
-            <select id="operador" required>
-              <option value="">Selecciona operador</option>
-              <option value="Brandon">Brandon</option>
-              <option value="Raul">Raul</option>
-            </select>
-          </label>
-
-          <label>
-            Fecha
-            <input id="fecha" type="date" required>
-          </label>
-
-          <label>
-            Divisa
-            <select id="divisa" required>
-              <option value="">Selecciona divisa</option>
-              <option value="EUR/USD">EUR/USD</option>
-              <option value="GBP/USD">GBP/USD</option>
-              <option value="USD/JPY">USD/JPY</option>
-              <option value="XAU/USD">XAU/USD</option>
-            </select>
-          </label>
-
-          <label>
-            Tipo Cuenta
-            <select id="tipo_cuenta" required>
-              <option value="">Selecciona tipo</option>
-              <option value="Apollo">Apollo</option>
-              <option value="Personal">Personal</option>
-            </select>
-          </label>
-
-          <label>
-            Tipo Orden
-            <select id="tipo_orden">
-              <option value="Buy">Buy</option>
-              <option value="Sell">Sell</option>
-            </select>
-          </label>
-
-          <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
-          <label>Precio Entrada <input id="precio_entrada" type="number" step="0.00001"></label>
-          <label>Precio Salida <input id="precio_salida" type="number" step="0.00001"></label>
-          <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01"></label>
-          <label>Comisión <input id="comision" type="number" step="0.01"></label>
-          <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01"></label>
-          <label>Porcentaje <input id="porcentaje" type="number" step="0.01"></label>
-          <label>Comentario <textarea id="comentario"></textarea></label>
-          <label>Captura URL <input id="captura_url" type="text"></label>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-          <button type="submit">Guardar Operación</button>
-        </div>
-      </form>
-    </div>
+  <div class="card">
+    <table id="journalTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Operador</th>
+          <th>Fecha</th>
+          <th>Divisa</th>
+          <th>Tipo Cuenta</th>
+          <th>Orden</th>
+          <th>Lotaje</th>
+          <th>Entrada</th>
+          <th>Salida</th>
+          <th>Bruto</th>
+          <th>Comisión</th>
+          <th>Neto</th>
+          <th>%</th>
+          <th>Comentario</th>
+          <th>Captura</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
+</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong id="modalTitle">Nueva operación</strong>
+      <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
+    </div>
+    <form id="form">
+      <div class="form-grid">
+        <label>
+          Operador
+          <select id="operador" required>
+            <option value="">Selecciona operador</option>
+            <option value="Brandon">Brandon</option>
+            <option value="Raul">Raul</option>
+          </select>
+        </label>
+
+        <label>
+          Fecha
+          <input id="fecha" type="date" required>
+        </label>
+
+        <label>
+          Divisa
+          <select id="divisa">
+            <option value="">Selecciona divisa</option>
+            <option value="EUR/USD">EUR/USD</option>
+            <option value="GBP/USD">GBP/USD</option>
+            <option value="USD/JPY">USD/JPY</option>
+            <option value="XAU/USD">XAU/USD</option>
+          </select>
+        </label>
+
+        <label>
+          Tipo Cuenta
+          <select id="tipo_cuenta">
+            <option value="">Selecciona tipo</option>
+            <option value="Apollo">Apollo</option>
+            <option value="Personal">Personal</option>
+          </select>
+        </label>
+
+        <label>
+          Tipo Orden
+          <select id="tipo_orden">
+            <option value="Buy">Buy</option>
+            <option value="Sell">Sell</option>
+          </select>
+        </label>
+
+        <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
+        <label>Precio Entrada <input id="precio_entrada" type="number"></label>
+        <label>Precio Salida <input id="precio_salida" type="number"></label>
+        <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01"></label>
+        <label>Comisión <input id="comision" type="number" step="0.01"></label>
+        <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01"></label>
+        <label>Porcentaje <input id="porcentaje" type="number" step="0.01"></label>
+        <label>Comentario <textarea id="comentario"></textarea></label>
+        <label>Captura URL <input id="captura_url" type="text"></label>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button type="submit">Guardar Operación</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
-  const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_0Ewu4iXl2LxOj-z_-RvgdA_6CeL-UyQ";
-  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0Ewu4iXl2LxOj-z_-RvgdA_6CeL-UyQ";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const newBtn = document.getElementById('newBtn');
-  const modal = document.getElementById('modal');
-  const closeModal = document.getElementById('closeModal');
-  const form = document.getElementById('form');
-  const tbody = document.getElementById('tbody');
-  const exportCSV = document.getElementById('exportCSV');
-  const divisaSelect = document.getElementById('divisa');
-  const precioEntrada = document.getElementById('precio_entrada');
-  const precioSalida = document.getElementById('precio_salida');
+const newBtn = document.getElementById('newBtn');
+const modal = document.getElementById('modal');
+const closeModal = document.getElementById('closeModal');
+const form = document.getElementById('form');
+const tbody = document.getElementById('tbody');
 
-  // Abrir modal
-  newBtn.addEventListener('click', ()=>{ 
-    modal.style.display='flex'; 
-    form.reset(); 
-    precioEntrada.removeAttribute('disabled');
-    precioSalida.removeAttribute('disabled');
+const divisaSelect = document.getElementById('divisa');
+const precioEntrada = document.getElementById('precio_entrada');
+const precioSalida = document.getElementById('precio_salida');
+
+// Función para obtener decimales según divisa
+function getDecimales(divisa){
+  switch(divisa){
+    case 'EUR/USD':
+    case 'GBP/USD':
+      return 5;
+    case 'USD/JPY':
+      return 3;
+    case 'XAU/USD':
+      return 2;
+    default:
+      return 4;
+  }
+}
+
+// Limitar decimales mientras se escribe
+function limitarDecimales(input){
+  const dec = getDecimales(divisaSelect.value);
+  if(input.value.includes('.')){
+    let [entero, decimal] = input.value.split('.');
+    decimal = decimal.slice(0, dec);
+    input.value = entero + (decimal ? '.' + decimal : '');
+  }
+}
+
+// Ajustar step al cambiar divisa
+divisaSelect.addEventListener('change', ()=>{
+  const dec = getDecimales(divisaSelect.value);
+  const step = '0.' + '0'.repeat(dec-1) + '1';
+  precioEntrada.step = step;
+  precioSalida.step = step;
+  limitarDecimales(precioEntrada);
+  limitarDecimales(precioSalida);
+});
+
+precioEntrada.addEventListener('input', ()=>limitarDecimales(precioEntrada));
+precioSalida.addEventListener('input', ()=>limitarDecimales(precioSalida));
+
+newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
+closeModal.addEventListener('click', ()=> modal.style.display='none');
+modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
+
+async function cargarOperaciones(){
+  const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
+  if(error){ alert("Error cargando: "+error.message); return; }
+  tbody.innerHTML = '';
+  if(data.length===0){ 
+    tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; 
+    return; 
+  }
+  data.forEach(op=>{
+    // Formatear fecha DD/MM/YYYY
+    let fechaFormateada = op.fecha ? new Date(op.fecha).toLocaleDateString('es-ES') : '';
+    tbody.innerHTML += `<tr>
+      <td>${op.id}</td>
+      <td>${op.operador||''}</td>
+      <td>${fechaFormateada}</td>
+      <td>${op.divisa||''}</td>
+      <td>${op.tipo_cuenta||''}</td>
+      <td>${op.tipo_orden||''}</td>
+      <td>${op.lotaje||''}</td>
+      <td>${op.precio_entrada||''}</td>
+      <td>${op.precio_salida||''}</td>
+      <td>${op.beneficio_bruto||''}</td>
+      <td>${op.comision||''}</td>
+      <td>${op.beneficio_neto||''}</td>
+      <td>${op.porcentaje||''}</td>
+      <td>${op.comentario||''}</td>
+      <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
+    </tr>`;
   });
-  closeModal.addEventListener('click', ()=> modal.style.display='none');
-  modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
+}
 
-  // Determinar decimales según divisa
-  function getDecimales(divisa){
-    switch(divisa){
-      case "EUR/USD": case "GBP/USD": case "USD/JPY": return 5;
-      case "XAU/USD": return 2;
-      default: return 5;
-    }
-  }
-
-  // Ajustar step y validación en tiempo real
-  divisaSelect.addEventListener('change', ()=>{
-    const dec = getDecimales(divisaSelect.value);
-    const step = '0.' + '0'.repeat(dec-1) + '1';
-    precioEntrada.step = step;
-    precioSalida.step = step;
-    // Limitar el número máximo de decimales mientras escriben
-    precioEntrada.addEventListener('input', ()=>{ limitarDecimales(precioEntrada, dec); });
-    precioSalida.addEventListener('input', ()=>{ limitarDecimales(precioSalida, dec); });
-  });
-
-  function limitarDecimales(input, decimales){
-    let val = input.value;
-    if(val.includes('.')){
-      let [entero, dec] = val.split('.');
-      dec = dec.slice(0, decimales);
-      input.value = entero + (dec ? '.' + dec : '');
-    }
-  }
-
-  // Formatear fecha dd/mm/yyyy
-  function formatFecha(fecha){
-    if(!fecha) return '';
-    const d = new Date(fecha);
-    if(isNaN(d)) return fecha;
-    const day = String(d.getDate()).padStart(2,'0');
-    const month = String(d.getMonth()+1).padStart(2,'0');
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
-
-  // Cargar operaciones
-  async function cargarOperaciones(){
-    const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
-    if(error){ alert("Error cargando: "+error.message); return; }
-    tbody.innerHTML = '';
-    if(data.length===0){ 
-      tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; 
-      return; 
-    }
-    data.forEach(op=>{
-      tbody.innerHTML += `<tr>
-        <td>${op.id}</td>
-        <td>${op.operador||''}</td>
-        <td>${formatFecha(op.fecha)}</td>
-        <td>${op.divisa||''}</td>
-        <td>${op.tipo_cuenta||''}</td>
-        <td>${op.tipo_orden||''}</td>
-        <td>${op.lotaje||''}</td>
-        <td>${op.precio_entrada||''}</td>
-        <td>${op.precio_salida||''}</td>
-        <td>${op.beneficio_bruto||''}</td>
-        <td>${op.comision||''}</td>
-        <td>${op.beneficio_neto||''}</td>
-        <td>${op.porcentaje||''}</td>
-        <td>${op.comentario||''}</td>
-        <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
-      </tr>`;
-    });
-  }
-
-  // Validar decimales exactos
-  function validarDecimales(valor, decimales){
-    if(valor === null || valor === undefined || valor === '') return true;
-    if(!valor.toString().includes('.')) return decimales===0;
-    const dec = valor.toString().split('.')[1].length;
-    return dec === decimales;
-  }
-
-  // Guardar operación
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const divisa = divisaSelect.value;
-    const decimales = getDecimales(divisa);
-    const entrada = precioEntrada.value;
-    const salida = precioSalida.value;
-
-    if(!validarDecimales(entrada, decimales)){
-      alert(`Precio de entrada debe tener exactamente ${decimales} decimales`);
-      return;
-    }
-    if(!validarDecimales(salida, decimales)){
-      alert(`Precio de salida debe tener exactamente ${decimales} decimales`);
-      return;
-    }
-
-    const data = {
-      operador: document.getElementById("operador").value,
-      fecha: document.getElementById("fecha").value,
-      divisa: divisa,
-      tipo_cuenta: document.getElementById("tipo_cuenta").value,
-      tipo_orden: document.getElementById("tipo_orden").value,
-      lotaje: parseFloat(document.getElementById("lotaje").value)||null,
-      precio_entrada: parseFloat(entrada)||null,
-      precio_salida: parseFloat(salida)||null,
-      beneficio_bruto: parseFloat(document.getElementById("beneficio_bruto").value)||null,
-      comision: parseFloat(document.getElementById("comision").value)||null,
-      beneficio_neto: parseFloat(document.getElementById("beneficio_neto").value)||null,
-      porcentaje: parseFloat(document.getElementById("porcentaje").value)||null,
-      comentario: document.getElementById("comentario").value,
-      captura_url: document.getElementById("captura_url").value
-    };
-
-    const {error} = await db.from('operaciones').insert(data);
-    if(error){ alert("Error guardando: "+error.message); return; }
-    modal.style.display='none';
-    cargarOperaciones();
-  });
-
-  // Exportar CSV
-  exportCSV.addEventListener('click', async ()=>{
-    const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:true});
-    if(error){ alert('Error exportando CSV: '+error.message); return; }
-    if(!data.length){ alert('No hay operaciones para exportar'); return; }
-    const cols = ['id','operador','fecha','divisa','tipo_cuenta','tipo_orden','lotaje','precio_entrada','precio_salida','beneficio_bruto','comision','beneficio_neto','porcentaje','comentario','captura_url'];
-    const rows = data.map(e=>cols.map(c=>`"${e[c]??''}"`).join(','));
-    const csv = cols.join(',') + '\n' + rows.join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-    a.download = 'trading-journal.csv';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const data = {
+    operador: document.getElementById("operador").value,
+    fecha: document.getElementById("fecha").value,
+    divisa: document.getElementById("divisa").value,
+    tipo_cuenta: document.getElementById("tipo_cuenta").value,
+    tipo_orden: document.getElementById("tipo_orden").value,
+    lotaje: parseFloat(document.getElementById("lotaje").value)||null,
+    precio_entrada: parseFloat(document.getElementById("precio_entrada").value)||null,
+    precio_salida: parseFloat(document.getElementById("precio_salida").value)||null,
+    beneficio_bruto: parseFloat(document.getElementById("beneficio_bruto").value)||null,
+    comision: parseFloat(document.getElementById("comision").value)||null,
+    beneficio_neto: parseFloat(document.getElementById("beneficio_neto").value)||null,
+    porcentaje: parseFloat(document.getElementById("porcentaje").value)||null,
+    comentario: document.getElementById("comentario").value,
+    captura_url: document.getElementById("captura_url").value
+  };
+  const {error} = await db.from('operaciones').insert(data);
+  if(error){ alert("Error guardando: "+error.message); return; }
+  modal.style.display='none';
   cargarOperaciones();
+});
+
+cargarOperaciones();
 </script>
 </body>
 </html>
