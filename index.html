@@ -157,6 +157,7 @@ const modal = document.getElementById('modal');
 const closeModal = document.getElementById('closeModal');
 const form = document.getElementById('form');
 const tbody = document.getElementById('tbody');
+const exportCSV = document.getElementById('exportCSV');
 
 const operador = document.getElementById('operador');
 const divisaSelect = document.getElementById('divisa');
@@ -170,14 +171,7 @@ const comision = document.getElementById('comision');
 const beneficioNeto = document.getElementById('beneficio_neto');
 const porcentaje = document.getElementById('porcentaje');
 
-let editingId = null;
-
-newBtn.addEventListener('click', ()=>{ 
-  modal.style.display='flex'; 
-  form.reset(); 
-  editingId = null;
-  document.getElementById('modalTitle').textContent = "Nueva operación";
-});
+newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
 closeModal.addEventListener('click', ()=> modal.style.display='none');
 modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
 
@@ -228,10 +222,7 @@ async function cargarOperaciones(){
       <td>${formatPorcentaje(op.porcentaje)}</td>
       <td>${op.comentario||''}</td>
       <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
-      <td>
-        <button class="editBtn" data-id="${op.id}">✎</button>
-        <button class="deleteBtn" data-id="${op.id}">Eliminar</button>
-      </td>
+      <td><button class="deleteBtn" data-id="${op.id}">Eliminar</button></td>
     </tr>`;
   });
 }
@@ -348,53 +339,20 @@ form.addEventListener('submit', async (e)=>{
     comentario: document.getElementById("comentario").value,
     captura_url: document.getElementById("captura_url").value
   };
-
-  if(editingId){
-    const {error} = await db.from('operaciones').update(data).eq('id', editingId);
-    if(error){ alert("Error actualizando: "+error.message); return; }
-    editingId = null;
-  }else{
-    const {error} = await db.from('operaciones').insert(data);
-    if(error){ alert("Error guardando: "+error.message); return; }
-  }
+  const {error} = await db.from('operaciones').insert(data);
+  if(error){ alert("Error guardando: "+error.message); return; }
   modal.style.display='none';
   cargarOperaciones();
 });
 
 tbody.addEventListener('click', async (e)=>{
-  const id = e.target.dataset.id;
-
   if(e.target.classList.contains('deleteBtn')){
+    const id = e.target.dataset.id;
     if(confirm("¿Estás seguro de eliminar esta operación?")){
       const {error} = await db.from('operaciones').delete().eq('id', Number(id));
       if(error){ alert("Error eliminando: "+error.message); return; }
       cargarOperaciones();
     }
-  }
-
-  if(e.target.classList.contains('editBtn')){
-    editingId = Number(id);
-    const {data, error} = await db.from('operaciones').select('*').eq('id', editingId).single();
-    if(error){ alert("Error cargando operación: "+error.message); return; }
-
-    document.getElementById('modalTitle').textContent = "Editar operación";
-    operador.value = data.operador;
-    document.getElementById('fecha').value = data.fecha;
-    divisaSelect.value = data.divisa;
-    tipo_cuenta.value = data.tipo_cuenta;
-    tipo_orden.value = data.tipo_orden;
-    lotaje.value = data.lotaje;
-    precioEntrada.value = data.precio_entrada;
-    precioSalida.value = data.precio_salida;
-    beneficioBruto.value = data.beneficio_bruto;
-    comision.value = data.comision;
-    beneficioNeto.value = data.beneficio_neto;
-    porcentaje.value = data.porcentaje;
-    document.getElementById('comentario').value = data.comentario;
-    document.getElementById('captura_url').value = data.captura_url;
-
-    divisaSelect.dispatchEvent(new Event('change'));
-    modal.style.display = 'flex';
   }
 });
 
