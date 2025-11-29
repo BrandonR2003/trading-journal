@@ -1,107 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Trading Journal</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  body{font-family:Arial,sans-serif;background:#121212;color:white;margin:0;padding:20px;}
-  .container{max-width:900px;margin:auto;background:#1e1e1e;padding:20px;border-radius:8px;}
-  input, select, textarea{width:100%;padding:8px;margin:6px 0;border-radius:4px;border:none;color:black;}
-  button{padding:10px;width:100%;background:#4caf50;border:none;color:white;font-size:16px;border-radius:5px;cursor:pointer;}
-  table{width:100%;border-collapse:collapse;margin-top:25px;}
-  th, td{border:1px solid #333;padding:8px;text-align:center;}
-  th{background:#333;}
-  .example{color:#ccc;font-size:12px;margin-top:-6px;margin-bottom:6px;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trading Journal</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
+      --glass: rgba(15,23,36,0.95);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:linear-gradient(180deg,#071025 0%, #071a2a 100%); color:#e6eef6;}
+    .container{max-width:1100px; margin:28px auto; padding:20px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted); font-size:13px}
+
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+    button{background:var(--accent);border:0;padding:8px 12px;border-radius:10px;color:#042027;cursor:pointer;font-weight:600}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
+    button.ghost{background:transparent;border:0;color:var(--muted)}
+
+    input, select, textarea{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:inherit;width:100%;}
+
+    .card{background:var(--card); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(2,6,23,0.6)}
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    thead th{ text-align:left; padding:12px 10px; color:var(--muted); font-weight:600; font-size:12px}
+    tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+    .long{width:220px}
+
+    @media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
+    .modal{width:100%;max-width:720px;background:var(--glass);border-radius:12px;padding:16px;backdrop-filter: blur(6px);}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media (max-width:600px){.form-grid{grid-template-columns:1fr}}
+    .example{color:#ccc;font-size:12px;margin-top:-6px;margin-bottom:6px;}
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>Trading Journal</h1>
-
-  <button id="newBtn">+ Nueva operación</button>
-
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th><th>Operador</th><th>Fecha</th><th>Divisa</th>
-          <th>Tipo Cuenta</th><th>Orden</th><th>Lotaje</th>
-          <th>Entrada</th><th>Salida</th><th>Bruto</th>
-          <th>Comisión</th><th>Neto</th><th>%</th>
-          <th>Comentario</th><th>Captura</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal-backdrop" id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
-  <div style="background:#222;padding:16px;border-radius:12px;width:100%;max-width:600px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <strong>Nueva operación</strong>
-      <button id="closeModal" style="background:none;border:none;color:#ccc;cursor:pointer;">Cerrar</button>
-    </div>
-    <form id="form">
-      <label>Operador
-        <select id="operador" required>
-          <option value="">Selecciona operador</option>
-          <option value="Brandon">Brandon</option>
-          <option value="Raul">Raul</option>
-        </select>
-      </label>
-
-      <label>Fecha
-        <input id="fecha" type="date" required>
-      </label>
-
-      <label>Divisa
-        <select id="divisa" required>
-          <option value="">Selecciona divisa</option>
-          <option value="EUR/USD">EUR/USD</option>
-          <option value="GBP/USD">GBP/USD</option>
-          <option value="USD/JPY">USD/JPY</option>
-          <option value="XAU/USD">XAU/USD</option>
-        </select>
-      </label>
-
-      <label>Tipo Cuenta
-        <select id="tipo_cuenta" required>
-          <option value="">Selecciona tipo</option>
-          <option value="Apollo">Apollo</option>
-          <option value="Personal">Personal</option>
-        </select>
-      </label>
-
-      <label>Tipo Orden
-        <select id="tipo_orden">
-          <option value="Buy">Buy</option>
-          <option value="Sell">Sell</option>
-        </select>
-      </label>
-
-      <label>Precio Entrada
-        <input id="precio_entrada" type="text" required>
-        <div class="example" id="ejemploEntrada"></div>
-      </label>
-
-      <label>Precio Salida
-        <input id="precio_salida" type="text" required>
-        <div class="example" id="ejemploSalida"></div>
-      </label>
-
-      <div style="margin-top:10px;">
-        <button type="submit">Guardar Operación</button>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Trading Journal</h1>
+        <div class="subtitle">Registro de operaciones</div>
       </div>
-    </form>
+      <div style="margin-left:auto" class="small muted">V 1.0</div>
+    </header>
+
+    <div class="toolbar">
+      <button id="newBtn">+ Nueva operación</button>
+    </div>
+
+    <div class="card">
+      <table id="journalTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Operador</th><th>Fecha</th><th>Divisa</th><th>Tipo Cuenta</th><th>Orden</th>
+            <th>Lotaje</th><th>Entrada</th><th>Salida</th><th>Bruto</th><th>Comisión</th><th>Neto</th>
+            <th>%</th><th>Comentario</th><th>Captura</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
   </div>
-</div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong id="modalTitle">Nueva operación</strong>
+        <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
+      </div>
+      <form id="form">
+  <div class="form-grid">
+    <label>
+      Operador
+      <select id="operador" required>
+        <option value="">Selecciona operador</option>
+        <option value="Brandon">Brandon</option>
+        <option value="Raul">Raul</option>
+      </select>
+    </label>
+
+    <label>
+      Fecha
+      <input id="fecha" type="date" required>
+    </label>
+
+    <label>
+      Divisa
+      <select id="divisa" required>
+        <option value="">Selecciona divisa</option>
+        <option value="EUR/USD">EUR/USD</option>
+        <option value="GBP/USD">GBP/USD</option>
+        <option value="USD/JPY">USD/JPY</option>
+        <option value="XAU/USD">XAU/USD</option>
+      </select>
+    </label>
+
+    <label>
+      Tipo Cuenta
+      <select id="tipo_cuenta" required>
+        <option value="">Selecciona tipo</option>
+        <option value="Apollo">Apollo</option>
+        <option value="Personal">Personal</option>
+      </select>
+    </label>
+
+    <label>
+      Tipo Orden
+      <select id="tipo_orden">
+        <option value="Buy">Buy</option>
+        <option value="Sell">Sell</option>
+      </select>
+    </label>
+
+    <label>Precio Entrada
+      <input id="precio_entrada" type="text" required>
+      <div class="example" id="ejemploEntrada"></div>
+    </label>
+
+    <label>Precio Salida
+      <input id="precio_salida" type="text" required>
+      <div class="example" id="ejemploSalida"></div>
+    </label>
+
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+    <button type="submit">Guardar Operación</button>
+  </div>
+</form>
+    </div>
+  </div>
 
 <script>
-  // --- Supabase ---
   const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
   const SUPABASE_KEY = "sb_publishable_0Ewu4iXl2LxOj-z_-RvgdA_6CeL-UyQ";
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -118,12 +156,6 @@
   const ejemploEntrada = document.getElementById('ejemploEntrada');
   const ejemploSalida = document.getElementById('ejemploSalida');
 
-  // Abrir/Cerrar modal
-  newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); resetEjemplo(); });
-  closeModal.addEventListener('click', ()=> modal.style.display='none');
-  modal.addEventListener('click', e=>{ if(e.target===modal) modal.style.display='none'; });
-
-  // Ejemplos y decimales por divisa
   const ejemploPorDivisa = {
     'EUR/USD': {ej:'1.15364', dec:5},
     'GBP/USD': {ej:'1.30875', dec:5},
@@ -136,6 +168,8 @@
     ejemploSalida.textContent = '';
     precioEntrada.value = '';
     precioSalida.value = '';
+    precioEntrada.dataset.dec='';
+    precioSalida.dataset.dec='';
   }
 
   function actualizarEjemplo(){
@@ -147,10 +181,7 @@
       precioEntrada.dataset.dec = dec;
       precioSalida.dataset.dec = dec;
     } else {
-      ejemploEntrada.textContent = '';
-      ejemploSalida.textContent = '';
-      precioEntrada.dataset.dec = '';
-      precioSalida.dataset.dec = '';
+      resetEjemplo();
     }
   }
 
@@ -160,7 +191,6 @@
     precioSalida.value='';
   });
 
-  // Bloquear decimales mientras escribe
   function limitarInput(input){
     input.addEventListener('input', ()=>{
       const dec = parseInt(input.dataset.dec||0);
@@ -176,14 +206,16 @@
   limitarInput(precioEntrada);
   limitarInput(precioSalida);
 
-  // Cargar operaciones
+  newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); resetEjemplo(); });
+  closeModal.addEventListener('click', ()=> modal.style.display='none');
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
+
   async function cargarOperaciones(){
     const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
     if(error){ alert("Error cargando: "+error.message); return; }
     tbody.innerHTML = '';
-    if(data.length===0){ tbody.innerHTML='<tr><td colspan="15" style="text-align:center;color:#ccc;">Sin operaciones registradas</td></tr>'; return; }
+    if(data.length===0){ tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; return; }
     data.forEach(op=>{
-      // Formatear fecha a dd/mm/yyyy
       let fecha = op.fecha ? new Date(op.fecha) : null;
       let fechaStr = fecha ? `${('0'+fecha.getDate()).slice(-2)}/${('0'+(fecha.getMonth()+1)).slice(-2)}/${fecha.getFullYear()}` : '';
       tbody.innerHTML += `<tr>
@@ -206,12 +238,10 @@
     });
   }
 
-  // Guardar operación con validación de decimales exactos
-  form.addEventListener('submit', async e=>{
+  form.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const dec = parseInt(precioEntrada.dataset.dec||0);
-    const regex = new RegExp(`^\\d+(\\.\\d{${dec}})$`); // exactos decimales
-
+    const regex = new RegExp(`^\\d+(\\.\\d{${dec}})$`);
     if(!regex.test(precioEntrada.value)){
       alert(`Precio Entrada debe tener exactamente ${dec} decimales`);
       return;
@@ -230,7 +260,6 @@
       precio_entrada: precioEntrada.value,
       precio_salida: precioSalida.value
     };
-
     const {error} = await db.from('operaciones').insert(data);
     if(error){ alert("Error guardando: "+error.message); return; }
     modal.style.display='none';
