@@ -8,7 +8,7 @@
   <style>
     :root {
       --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
-      --glass: rgba(255,255,255,0.03);
+      --glass: rgba(15,23,36,0.95); /* menos transparente */
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
     *{box-sizing:border-box}
@@ -35,8 +35,8 @@
     @media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
 
     /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px}
-    .modal{width:100%;max-width:720px;background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.02));border-radius:12px;padding:16px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
+    .modal{width:100%;max-width:720px;background:var(--glass);border-radius:12px;padding:16px;backdrop-filter: blur(6px);}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     @media (max-width:600px){.form-grid{grid-template-columns:1fr}}
   </style>
@@ -54,7 +54,6 @@
     <div class="toolbar">
       <button id="newBtn">+ Nueva operación</button>
       <button id="exportCSV" class="secondary">Exportar CSV</button>
-      <button id="exportJSON" class="secondary">Exportar JSON</button>
     </div>
 
     <div class="card">
@@ -120,7 +119,6 @@
   </div>
 
 <script>
-  // --- CONFIGURACIÓN SUPABASE ---
   const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
   const SUPABASE_KEY = "sb_publishable_0Ewu4iXl2LxOj-z_-RvgdA_6CeL-UyQ";
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -130,6 +128,7 @@
   const closeModal = document.getElementById('closeModal');
   const form = document.getElementById('form');
   const tbody = document.getElementById('tbody');
+  const exportCSV = document.getElementById('exportCSV');
 
   newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
   closeModal.addEventListener('click', ()=> modal.style.display='none');
@@ -183,6 +182,20 @@
     if(error){ alert("Error guardando: "+error.message); return; }
     modal.style.display='none';
     cargarOperaciones();
+  });
+
+  exportCSV.addEventListener('click', async ()=>{
+    const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:true});
+    if(error){ alert('Error exportando CSV: '+error.message); return; }
+    if(!data.length){ alert('No hay operaciones para exportar'); return; }
+    const cols = ['id','operador','fecha','divisa','tipo_cuenta','tipo_orden','lotaje','precio_entrada','precio_salida','beneficio_bruto','comision','beneficio_neto','porcentaje','comentario','captura_url'];
+    const rows = data.map(e=>cols.map(c=>`"${e[c]??''}"`).join(','));
+    const csv = cols.join(',') + '\n' + rows.join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download = 'trading-journal.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
   });
 
   cargarOperaciones();
