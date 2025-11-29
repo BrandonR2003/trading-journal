@@ -47,7 +47,7 @@
         <h1>Trading Journal</h1>
         <div class="subtitle">Registro de operaciones</div>
       </div>
-      <div style="margin-left:auto" class="small muted">V1.3</div>
+      <div style="margin-left:auto" class="small muted">V1.4</div>
     </header>
 
     <div class="toolbar">
@@ -227,6 +227,20 @@ const ejemploPorDivisa = {
   'XAU/USD': {ej:'4016.98', dec:2}
 };
 
+// Configuración pips y valor por lote
+const configDivisa = {
+  'EUR/USD': {pip:0.0001, valorPorLote:10},
+  'GBP/USD': {pip:0.0001, valorPorLote:10},
+  'USD/JPY': {pip:0.01, valorPorLote:9.13},
+  'XAU/USD': {pip:0.1, valorPorLote:10}
+};
+
+// Comisiones
+const comisionPorCuenta = {
+  'Apollo':7,
+  'Personal':6
+};
+
 divisaSelect.addEventListener('change', ()=>{
   const div = divisaSelect.value;
   if(ejemploPorDivisa[div]){
@@ -264,28 +278,26 @@ tipo_cuenta.addEventListener('change', calcularAutomatico);
 tipo_orden.addEventListener('change', calcularAutomatico);
 
 function calcularAutomatico(){
+  const div = divisaSelect.value;
   const entrada = parseFloat(precioEntrada.value);
   const salida = parseFloat(precioSalida.value);
   const lts = parseFloat(lotaje.value);
-  if(isNaN(entrada) || isNaN(salida) || isNaN(lts)) return;
-  let bruto = 0;
-  if(tipo_orden.value === 'Buy'){
-    bruto = (salida - entrada) * lts;
-  } else {
-    bruto = (entrada - salida) * lts;
-  }
+  const orden = tipo_orden.value;
+  const cuenta = tipo_cuenta.value;
+  if(!div || isNaN(entrada) || isNaN(salida) || isNaN(lts) || !orden || !cuenta) return;
+
+  const {pip, valorPorLote} = configDivisa[div];
+
+  let bruto = ((orden==='Buy') ? (salida-entrada) : (entrada-salida)) / pip * valorPorLote * lts;
   beneficioBruto.value = bruto.toFixed(2);
 
-  let com = 0;
-  if(tipo_cuenta.value === 'Apollo') com = 7*lts;
-  else if(tipo_cuenta.value === 'Personal') com = 6*lts;
+  let com = (comisionPorCuenta[cuenta] || 0) * lts;
   comision.value = com.toFixed(2);
 
   const neto = bruto - com;
   beneficioNeto.value = neto.toFixed(2);
 
-  const pct = (neto / (entrada*lts))*100;
-  porcentaje.value = pct.toFixed(2);
+  porcentaje.value = ((neto / (entrada * lts)) *100).toFixed(2);
 }
 
 form.addEventListener('submit', async (e)=>{
@@ -325,7 +337,6 @@ form.addEventListener('submit', async (e)=>{
   cargarOperaciones();
 });
 
-// Exportar CSV y eliminar (igual que antes)
 exportCSV.addEventListener('click', async ()=>{/* ... */});
 tbody.addEventListener('click', async (e)=>{
   if(e.target.classList.contains('deleteBtn')){
