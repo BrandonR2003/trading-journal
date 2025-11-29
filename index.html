@@ -230,8 +230,8 @@ async function cargarOperaciones(){
       <td>${op.comentario||''}</td>
       <td>${op.captura_url ? `<a href="${op.captura_url}" target="_blank">Ver</a>` : ''}</td>
       <td style="display:flex; gap:6px">
-        <button class="editBtn" data-id="${op.id}" style="background:#ef4444; padding:6px 10px; border-radius:6px; color:white; cursor:pointer;">✎</button>
-        <button class="deleteBtn" data-id="${op.id}" style="background:#ef4444; padding:6px 10px; border-radius:6px; color:white; cursor:pointer;">×</button>
+        <button class="editBtn" data-id="${op.id}" style="background:var(--accent); padding:6px 12px; border-radius:8px; color:#042027; font-weight:600; cursor:pointer; width:32px; text-align:center;">✎</button>
+        <button class="deleteBtn" data-id="${op.id}" style="background:#ef4444; padding:6px 12px; border-radius:8px; color:white; cursor:pointer; width:32px; text-align:center;">×</button>
       </td>
     </tr>`;
   });
@@ -420,3 +420,4 @@ cargarOperaciones();
 </script>
 </body>
 </html>
+
