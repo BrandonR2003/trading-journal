@@ -22,6 +22,7 @@
     button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
     button.ghost{background:transparent;border:0;color:var(--muted)}
     input, select, textarea{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:inherit;width:100%;}
+
     .card{background:var(--card); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(2,6,23,0.6)}
     table{width:100%; border-collapse:collapse; font-size:13px}
     thead th{ text-align:left; padding:12px 10px; color:var(--muted); font-weight:600; font-size:12px}
@@ -184,6 +185,17 @@ function formatFecha(fecha) {
   return `${dia}/${mes}/${año}`;
 }
 
+// --- NUEVAS FUNCIONES DE FORMATO ---
+function formatDinero(valor){
+  if(valor==null) return '';
+  return '$' + parseFloat(valor).toFixed(2);
+}
+
+function formatPorcentaje(valor){
+  if(valor==null) return '';
+  return parseFloat(valor).toFixed(2) + '%';
+}
+
 async function cargarOperaciones(){
   const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
   if(error){ alert("Error cargando: "+error.message); return; }
@@ -203,10 +215,10 @@ async function cargarOperaciones(){
       <td>${op.lotaje||''}</td>
       <td>${op.precio_entrada||''}</td>
       <td>${op.precio_salida||''}</td>
-      <td>${op.beneficio_bruto||''}</td>
-      <td>${op.comision||''}</td>
-      <td>${op.beneficio_neto||''}</td>
-      <td>${op.porcentaje||''}</td>
+      <td>${formatDinero(op.beneficio_bruto)}</td>
+      <td>${formatDinero(op.comision)}</td>
+      <td>${formatDinero(op.beneficio_neto)}</td>
+      <td>${formatPorcentaje(op.porcentaje)}</td>
       <td>${op.comentario||''}</td>
       <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
       <td><button class="deleteBtn" data-id="${op.id}">Eliminar</button></td>
@@ -355,5 +367,3 @@ cargarOperaciones();
 </script>
 </body>
 </html>
-
-
