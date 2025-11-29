@@ -137,7 +137,7 @@
   // --- CONFIGURACIÓN SUPABASE ---
   const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
   const SUPABASE_KEY = "sb_publishable_0Ewu4iXl2LxOj-z_-RvgdA_6CeL-UyQ";
-  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // --- GUARDAR UNA OPERACIÓN ---
   async function guardarOperacion() {
@@ -209,3 +209,4 @@
 
 </body>
 </html>
+
