@@ -416,7 +416,58 @@ tbody.addEventListener('click', async (e)=>{
   }
 });
 
+  // EXPORTAR CSV CON FORMATO USD Y %
+exportCSV.addEventListener("click", exportarCSV);
+
+function exportarCSV() {
+  const filas = document.querySelectorAll("#journalTable tbody tr");
+  if (filas.length === 0) {
+    alert("No hay datos para exportar.");
+    return;
+  }
+
+  let csv = [];
+  
+  // Encabezados
+  const headers = [
+    "ID","Trader","Fecha","Divisa","Cuenta","Orden","Lotaje",
+    "Entrada","Salida","Bruto (USD)","Comisión (USD)","Neto (USD)","Porcentaje","Comentario","Captura"
+  ];
+  csv.push(headers.join(","));
+
+  // Filas
+  filas.forEach(row => {
+    const celdas = row.querySelectorAll("td");
+    if (celdas.length === 1) return; // evita fila "Sin datos"
+
+    const fila = [];
+
+    for (let i = 0; i < celdas.length - 1; i++) {
+      let texto = celdas[i].innerText.trim();
+
+      // Evitar que comas rompan el CSV
+      if (texto.includes(",")) texto = `"${texto}"`;
+
+      fila.push(texto);
+    }
+
+    csv.push(fila.join(","));
+  });
+
+  // Crear archivo
+  const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "operaciones.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+  
 cargarOperaciones();
 </script>
 </body>
 </html>
+
