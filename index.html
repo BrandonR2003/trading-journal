@@ -6,11 +6,7 @@
   <title>Trading Journal</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root {
-      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
-      --glass: rgba(15,23,36,0.95);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
+    :root { --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185; --glass: rgba(15,23,36,0.95); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
     *{box-sizing:border-box}
     body{margin:0; background:linear-gradient(180deg,#071025 0%, #071a2a 100%); color:#e6eef6;}
     .container{max-width:1100px; margin:28px auto; padding:20px}
@@ -37,115 +33,89 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div>
-        <h1>Trading Journal</h1>
-        <div class="subtitle">Registro de operaciones</div>
-      </div>
-      <div style="margin-left:auto" class="small muted">V1.4.1</div>
-    </header>
-
-    <div class="toolbar">
-      <button id="newBtn">+ Nueva operación</button>
-      <button id="exportCSV" class="secondary">Exportar CSV</button>
+<div class="container">
+  <header>
+    <div>
+      <h1>Trading Journal</h1>
+      <div class="subtitle">Registro de operaciones</div>
     </div>
+    <div style="margin-left:auto" class="small muted">V1.4.4</div>
+  </header>
 
-    <div class="card">
-      <table id="journalTable">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Trader</th>
-            <th>Fecha</th>
-            <th>Divisa</th>
-            <th>Cuenta</th>
-            <th>Orden</th>
-            <th>Lotaje</th>
-            <th>Entrada</th>
-            <th>Salida</th>
-            <th>Bruto</th>
-            <th>Comisión</th>
-            <th>Neto</th>
-            <th>%</th>
-            <th>Comentario</th>
-            <th>Captura</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+  <div class="toolbar">
+    <button id="newBtn">+ Nueva operación</button>
+    <button id="exportCSV" class="secondary">Exportar CSV</button>
   </div>
 
-  <!-- Modal -->
-  <div class="modal-backdrop" id="modal">
-    <div class="modal">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong id="modalTitle">Nueva operación</strong>
-        <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
-      </div>
-      <form id="form">
-        <div class="form-grid">
-          <label>
-            Trader
-            <select id="operador" required>
-              <option value="">Selecciona trader</option>
-              <option value="Brandon">Brandon</option>
-              <option value="Raul">Raul</option>
-            </select>
-          </label>
-
-          <label>
-            Fecha
-            <input id="fecha" type="date" required>
-          </label>
-
-          <label>
-            Divisa
-            <select id="divisa">
-              <option value="">Selecciona divisa</option>
-              <option value="EUR/USD">EUR/USD</option>
-              <option value="GBP/USD">GBP/USD</option>
-              <option value="USD/JPY">USD/JPY</option>
-              <option value="XAU/USD">XAU/USD</option>
-            </select>
-          </label>
-
-          <label>
-            Cuenta
-            <select id="tipo_cuenta">
-              <option value="">Selecciona cuenta</option>
-              <option value="Apollo">Apollo</option>
-              <option value="Personal">Personal</option>
-            </select>
-          </label>
-
-          <label>
-            Tipo de Orden
-            <select id="tipo_orden">
-              <option value="Buy">Buy</option>
-              <option value="Sell">Sell</option>
-            </select>
-          </label>
-
-          <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
-          <label>Precio de Entrada <input id="precio_entrada" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
-          <label>Precio de Salida <input id="precio_salida" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
-
-          <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01" readonly></label>
-          <label>Comisión <input id="comision" type="number" step="0.01" readonly></label>
-          <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01" readonly></label>
-          <label>Porcentaje <input id="porcentaje" type="number" step="0.01" readonly></label>
-          <label>Comentario <textarea id="comentario"></textarea></label>
-          <label>Captura URL <input id="captura_url" type="text"></label>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-          <button type="submit">Guardar Operación</button>
-        </div>
-      </form>
-    </div>
+  <div class="card">
+    <table id="journalTable">
+      <thead>
+        <tr>
+          <th>ID</th><th>Trader</th><th>Fecha</th><th>Divisa</th><th>Cuenta</th>
+          <th>Orden</th><th>Lotaje</th><th>Entrada</th><th>Salida</th>
+          <th>Bruto</th><th>Comisión</th><th>Neto</th><th>%</th>
+          <th>Comentario</th><th>Captura</th><th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
+</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong id="modalTitle">Nueva operación</strong>
+      <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
+    </div>
+    <form id="form">
+      <div class="form-grid">
+        <label>Trader
+          <select id="operador" required>
+            <option value="">Selecciona trader</option>
+            <option value="Brandon">Brandon</option>
+            <option value="Raul">Raul</option>
+          </select>
+        </label>
+        <label>Fecha <input id="fecha" type="date" required></label>
+        <label>Divisa
+          <select id="divisa">
+            <option value="">Selecciona divisa</option>
+            <option value="EUR/USD">EUR/USD</option>
+            <option value="GBP/USD">GBP/USD</option>
+            <option value="USD/JPY">USD/JPY</option>
+            <option value="XAU/USD">XAU/USD</option>
+          </select>
+        </label>
+        <label>Cuenta
+          <select id="tipo_cuenta">
+            <option value="">Selecciona cuenta</option>
+            <option value="Apollo">Apollo</option>
+            <option value="Personal">Personal</option>
+          </select>
+        </label>
+        <label>Tipo de Orden
+          <select id="tipo_orden">
+            <option value="Buy">Buy</option>
+            <option value="Sell">Sell</option>
+          </select>
+        </label>
+        <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
+        <label>Precio Entrada <input id="precio_entrada" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
+        <label>Precio Salida <input id="precio_salida" type="number" step="0.0001" placeholder="ej. 0.00000"></label>
+        <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01" readonly></label>
+        <label>Comisión <input id="comision" type="number" step="0.01" readonly></label>
+        <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01" readonly></label>
+        <label>Porcentaje <input id="porcentaje" type="number" step="0.01" readonly></label>
+        <label>Comentario <textarea id="comentario"></textarea></label>
+        <label>Captura URL <input id="captura_url" type="text"></label>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button type="submit">Guardar Operación</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
 const SUPABASE_URL = "https://odunrxnrjgajnmwmzwag.supabase.co";
@@ -157,7 +127,6 @@ const modal = document.getElementById('modal');
 const closeModal = document.getElementById('closeModal');
 const form = document.getElementById('form');
 const tbody = document.getElementById('tbody');
-const exportCSV = document.getElementById('exportCSV');
 
 const operador = document.getElementById('operador');
 const divisaSelect = document.getElementById('divisa');
@@ -171,188 +140,172 @@ const comision = document.getElementById('comision');
 const beneficioNeto = document.getElementById('beneficio_neto');
 const porcentaje = document.getElementById('porcentaje');
 
-newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
+let editingId = null;
+
+newBtn.addEventListener('click', ()=>{ 
+  modal.style.display='flex'; form.reset(); editingId=null; document.getElementById('modalTitle').textContent="Nueva operación";
+});
 closeModal.addEventListener('click', ()=> modal.style.display='none');
 modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
 
-function formatFecha(fecha) {
-  if (!fecha) return "";
-  const d = new Date(fecha);
-  const dia = String(d.getDate()).padStart(2, '0');
-  const mes = String(d.getMonth() + 1).padStart(2, '0');
-  const año = d.getFullYear();
-  return `${dia}/${mes}/${año}`;
+function formatFecha(fecha){
+  if(!fecha) return "";
+  const d=new Date(fecha);
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
+function formatUSD(valor){ if(valor==null) return ''; return valor<0?`<span style="color:#fb7185">-$${Math.abs(valor).toFixed(2)}</span>`:`$${valor.toFixed(2)}`;}
+function formatPorcentaje(valor){ if(valor==null) return ''; return valor<0?`<span style="color:#fb7185">${valor.toFixed(2)}%</span>`:`${valor.toFixed(2)}%`;}
 
-// Funciones de formato
-function formatUSD(valor){
-  if(valor==null) return '';
-  if(valor<0) return `<span style="color:#fb7185">-$${Math.abs(valor).toFixed(2)}</span>`;
-  return `$${valor.toFixed(2)}`;
-}
+// --- Configuración decimales y comisiones ---
+const ejemploPorDivisa={'EUR/USD':{ej:'1.15364',dec:5},'GBP/USD':{ej:'1.30875',dec:5},'USD/JPY':{ej:'145.432',dec:3},'XAU/USD':{ej:'4016.98',dec:2}};
+const configDivisa={'EUR/USD':{pip:0.0001,valorPorLote:10},'GBP/USD':{pip:0.0001,valorPorLote:10},'USD/JPY':{pip:0.01,valorPorLote:9.13},'XAU/USD':{pip:0.1,valorPorLote:10}};
+const comisionPorCuenta={'Apollo':7,'Personal':6};
 
-function formatPorcentaje(valor){
-  if(valor==null) return '';
-  if(valor<0) return `<span style="color:#fb7185">${valor.toFixed(2)}%</span>`;
-  return `${valor.toFixed(2)}%`;
-}
-
+// --- Cargar operaciones ---
 async function cargarOperaciones(){
-  const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
+  const {data,error}=await db.from('operaciones').select('*').order('id',{ascending:false});
   if(error){ alert("Error cargando: "+error.message); return; }
-  tbody.innerHTML = '';
-  if(data.length===0){ 
-    tbody.innerHTML='<tr><td colspan="16" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; 
-    return; 
-  }
+  tbody.innerHTML='';
+  if(data.length===0){ tbody.innerHTML='<tr><td colspan="16" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; return;}
   data.forEach(op=>{
-    tbody.innerHTML += `<tr>
-      <td>${op.id}</td>
-      <td>${op.operador||''}</td>
-      <td>${formatFecha(op.fecha)}</td>
-      <td>${op.divisa||''}</td>
-      <td>${op.tipo_cuenta||''}</td>
-      <td>${op.tipo_orden||''}</td>
-      <td>${op.lotaje||''}</td>
-      <td>${op.precio_entrada||''}</td>
-      <td>${op.precio_salida||''}</td>
-      <td>${formatUSD(op.beneficio_bruto)}</td>
-      <td>${formatUSD(op.comision)}</td>
-      <td>${formatUSD(op.beneficio_neto)}</td>
-      <td>${formatPorcentaje(op.porcentaje)}</td>
-      <td>${op.comentario||''}</td>
-      <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
-      <td><button class="deleteBtn" data-id="${op.id}">Eliminar</button></td>
+    tbody.innerHTML+=`<tr>
+      <td>${op.id}</td><td>${op.operador||''}</td><td>${formatFecha(op.fecha)}</td><td>${op.divisa||''}</td><td>${op.tipo_cuenta||''}</td>
+      <td>${op.tipo_orden||''}</td><td>${op.lotaje||''}</td><td>${op.precio_entrada||''}</td><td>${op.precio_salida||''}</td>
+      <td>${formatUSD(op.beneficio_bruto)}</td><td>${formatUSD(op.comision)}</td><td>${formatUSD(op.beneficio_neto)}</td><td>${formatPorcentaje(op.porcentaje)}</td>
+      <td>${op.comentario||''}</td><td>${op.captura_url?`<a href="${op.captura_url}" target="_blank">Ver</a>`:''}</td>
+      <td>
+        <button class="editBtn" data-id="${op.id}" style="background:#10b981;color:white;border:none;border-radius:6px;width:28px;height:28px;font-weight:bold;cursor:pointer;margin-right:4px;">✎</button>
+        <button class="deleteBtn" data-id="${op.id}" style="background:#2563eb;color:white;border:none;border-radius:6px;width:28px;height:28px;font-weight:bold;cursor:pointer;">×</button>
+      </td>
     </tr>`;
   });
 }
 
-// Decimales por divisa
-const ejemploPorDivisa = {
-  'EUR/USD': {ej:'1.15364', dec:5},
-  'GBP/USD': {ej:'1.30875', dec:5},
-  'USD/JPY': {ej:'145.432', dec:3},
-  'XAU/USD': {ej:'4016.98', dec:2}
-};
-
-// Configuración pips y valor por lote
-const configDivisa = {
-  'EUR/USD': {pip:0.0001, valorPorLote:10},
-  'GBP/USD': {pip:0.0001, valorPorLote:10},
-  'USD/JPY': {pip:0.01, valorPorLote:9.13},
-  'XAU/USD': {pip:0.1, valorPorLote:10}
-};
-
-// Comisiones
-const comisionPorCuenta = {
-  'Apollo':7,
-  'Personal':6
-};
-
-divisaSelect.addEventListener('change', ()=>{
+// --- Calculo automático ---
+function calcularAutomatico(){
   const div = divisaSelect.value;
-  if(ejemploPorDivisa[div]){
-    const {ej, dec} = ejemploPorDivisa[div];
-    precioEntrada.placeholder = 'ej. '+ej;
-    precioSalida.placeholder = 'ej. '+ej;
-    precioEntrada.dataset.dec = dec;
-    precioSalida.dataset.dec = dec;
-    let step = '1';
-    if(dec>0) step = '0.' + '0'.repeat(dec-1)+'1';
-    precioEntrada.step = step;
-    precioSalida.step = step;
-    precioEntrada.value=''; precioSalida.value=''; beneficioBruto.value=''; comision.value=''; beneficioNeto.value=''; porcentaje.value='';
-  }
-});
+  const entrada=parseFloat(precioEntrada.value);
+  const salida=parseFloat(precioSalida.value);
+  const lts=parseFloat(lotaje.value);
+  const orden=tipo_orden.value;
+  const cuenta=tipo_cuenta.value;
+  if(!div||isNaN(entrada)||isNaN(salida)||isNaN(lts)||!orden||!cuenta) return;
+  const {pip,valorPorLote}=configDivisa[div];
+  let bruto=((orden==='Buy')?(salida-entrada):(entrada-salida))/pip*valorPorLote*lts;
+  beneficioBruto.value=bruto.toFixed(2);
+  let com=(comisionPorCuenta[cuenta]||0)*lts;
+  comision.value=com.toFixed(2);
+  let neto=bruto-com;
+  beneficioNeto.value=neto.toFixed(2);
+  const balance=cuenta==='Apollo'?5000:1000;
+  porcentaje.value=((neto/balance)*100).toFixed(2);
+}
 
+// --- Limitar decimales ---
 function limitarInput(input){
   input.addEventListener('input', ()=>{
-    const dec = parseInt(input.dataset.dec||0);
+    const dec=parseInt(input.dataset.dec||0);
     if(!dec) return;
-    let val = input.value;
+    let val=input.value;
     if(val.includes('.')){
-      let [entero, decimal] = val.split('.');
-      decimal = decimal.slice(0, dec);
-      input.value = entero + (decimal ? '.'+decimal : '');
+      let [entero,decimal]=val.split('.');
+      decimal=decimal.slice(0,dec);
+      input.value=entero+(decimal?'.'+decimal:'');
     }
     calcularAutomatico();
   });
 }
+
+// --- Eventos ---
+divisaSelect.addEventListener('change', ()=>{
+  const div=divisaSelect.value;
+  if(ejemploPorDivisa[div]){
+    const {ej,dec}=ejemploPorDivisa[div];
+    precioEntrada.placeholder='ej. '+ej;
+    precioSalida.placeholder='ej. '+ej;
+    precioEntrada.dataset.dec=dec;
+    precioSalida.dataset.dec=dec;
+    let step='1';
+    if(dec>0) step='0.'+'0'.repeat(dec-1)+'1';
+    precioEntrada.step=step;
+    precioSalida.step=step;
+    precioEntrada.value=''; precioSalida.value=''; beneficioBruto.value=''; comision.value=''; beneficioNeto.value=''; porcentaje.value='';
+  }
+});
+
 limitarInput(precioEntrada);
 limitarInput(precioSalida);
 lotaje.addEventListener('input', calcularAutomatico);
 tipo_cuenta.addEventListener('change', calcularAutomatico);
 tipo_orden.addEventListener('change', calcularAutomatico);
 
-function calcularAutomatico(){
-  const div = divisaSelect.value;
-  const entrada = parseFloat(precioEntrada.value);
-  const salida = parseFloat(precioSalida.value);
-  const lts = parseFloat(lotaje.value);
-  const orden = tipo_orden.value;
-  const cuenta = tipo_cuenta.value;
-  if(!div || isNaN(entrada) || isNaN(salida) || isNaN(lts) || !orden || !cuenta) return;
-
-  const {pip, valorPorLote} = configDivisa[div];
-
-  let bruto = ((orden==='Buy') ? (salida-entrada) : (entrada-salida)) / pip * valorPorLote * lts;
-  beneficioBruto.value = bruto.toFixed(2);
-
-  let com = (comisionPorCuenta[cuenta] || 0) * lts;
-  comision.value = com.toFixed(2);
-
-  const neto = bruto - com;
-  beneficioNeto.value = neto.toFixed(2);
-
-  const balance = cuenta==='Apollo' ? 5000 : 1000;
-  porcentaje.value = ((neto / balance)*100).toFixed(2);
-}
-
-form.addEventListener('submit', async (e)=>{
+// --- Submit ---
+form.addEventListener('submit', async e=>{
   e.preventDefault();
-  const dec = parseInt(precioEntrada.dataset.dec||0);
+  const dec=parseInt(precioEntrada.dataset.dec||0);
   if(dec){
-    const regex = new RegExp(`^\\d+(\\.\\d{${dec}})$`);
-    if(!regex.test(precioEntrada.value)){
-      alert(`Precio Entrada debe tener exactamente ${dec} decimales`);
-      return;
-    }
-    if(!regex.test(precioSalida.value)){
-      alert(`Precio Salida debe tener exactamente ${dec} decimales`);
-      return;
-    }
+    const regex=new RegExp(`^\\d+(\\.\\d{1,${dec}})?$`);
+    if(!regex.test(precioEntrada.value)){ alert(`Precio Entrada debe tener como máximo ${dec} decimales`); return;}
+    if(!regex.test(precioSalida.value)){ alert(`Precio Salida debe tener como máximo ${dec} decimales`); return;}
   }
-
-  const data = {
-    operador: operador.value,
-    fecha: document.getElementById("fecha").value,
-    divisa: divisaSelect.value,
-    tipo_cuenta: tipo_cuenta.value,
-    tipo_orden: tipo_orden.value,
-    lotaje: parseFloat(lotaje.value)||null,
-    precio_entrada: parseFloat(precioEntrada.value)||null,
-    precio_salida: parseFloat(precioSalida.value)||null,
-    beneficio_bruto: parseFloat(beneficioBruto.value)||null,
-    comision: parseFloat(comision.value)||null,
-    beneficio_neto: parseFloat(beneficioNeto.value)||null,
-    porcentaje: parseFloat(porcentaje.value)||null,
-    comentario: document.getElementById("comentario").value,
-    captura_url: document.getElementById("captura_url").value
+  const data={
+    operador:operador.value,
+    fecha:document.getElementById("fecha").value,
+    divisa:divisaSelect.value,
+    tipo_cuenta:tipo_cuenta.value,
+    tipo_orden:tipo_orden.value,
+    lotaje:parseFloat(lotaje.value)||null,
+    precio_entrada:parseFloat(precioEntrada.value)||null,
+    precio_salida:parseFloat(precioSalida.value)||null,
+    beneficio_bruto:parseFloat(beneficioBruto.value)||null,
+    comision:parseFloat(comision.value)||null,
+    beneficio_neto:parseFloat(beneficioNeto.value)||null,
+    porcentaje:parseFloat(porcentaje.value)||null,
+    comentario:document.getElementById("comentario").value,
+    captura_url:document.getElementById("captura_url").value
   };
-  const {error} = await db.from('operaciones').insert(data);
-  if(error){ alert("Error guardando: "+error.message); return; }
+  if(editingId){
+    const {error}=await db.from('operaciones').update(data).eq('id',editingId);
+    if(error){ alert("Error actualizando: "+error.message); return; }
+    editingId=null;
+  } else {
+    const {error}=await db.from('operaciones').insert(data);
+    if(error){ alert("Error guardando: "+error.message); return; }
+  }
   modal.style.display='none';
   cargarOperaciones();
 });
 
-tbody.addEventListener('click', async (e)=>{
+// --- Editar / eliminar ---
+tbody.addEventListener('click', async e=>{
+  const id=e.target.dataset.id;
   if(e.target.classList.contains('deleteBtn')){
-    const id = e.target.dataset.id;
     if(confirm("¿Estás seguro de eliminar esta operación?")){
-      const {error} = await db.from('operaciones').delete().eq('id', Number(id));
+      const {error}=await db.from('operaciones').delete().eq('id',Number(id));
       if(error){ alert("Error eliminando: "+error.message); return; }
       cargarOperaciones();
     }
+  }
+  if(e.target.classList.contains('editBtn')){
+    editingId=Number(id);
+    const {data,error}=await db.from('operaciones').select('*').eq('id',editingId).single();
+    if(error){ alert("Error cargando operación: "+error.message); return;}
+    document.getElementById('modalTitle').textContent="Editar operación";
+    operador.value=data.operador;
+    document.getElementById('fecha').value=data.fecha;
+    divisaSelect.value=data.divisa;
+    tipo_cuenta.value=data.tipo_cuenta;
+    tipo_orden.value=data.tipo_orden;
+    lotaje.value=data.lotaje;
+    precioEntrada.value=data.precio_entrada;
+    precioSalida.value=data.precio_salida;
+    beneficioBruto.value=data.beneficio_bruto;
+    comision.value=data.comision;
+    beneficioNeto.value=data.beneficio_neto;
+    porcentaje.value=data.porcentaje;
+    document.getElementById('comentario').value=data.comentario;
+    document.getElementById('captura_url').value=data.captura_url;
+    modal.style.display='flex';
   }
 });
 
