@@ -222,7 +222,18 @@ async function cargarOperaciones(){
       <td>${formatPorcentaje(op.porcentaje)}</td>
       <td>${op.comentario||''}</td>
       <td>${op.captura_url ? `<a href="${op.captura_url}" target="_blank">Ver</a>` : ''}</td>
-      <td><button class="deleteBtn" data-id="${op.id}">Eliminar</button></td>
+      <td>
+  <button class="deleteBtn" data-id="${op.id}" style="
+    background:#2563eb; 
+    color:white; 
+    border:none; 
+    border-radius:6px; 
+    width:28px; 
+    height:28px; 
+    font-weight:bold; 
+    cursor:pointer;
+  ">×</button>
+</td>
     </tr>`;
   });
 }
@@ -234,3 +245,4 @@ cargarOperaciones();
 </script>
 </body>
 </html>
+
