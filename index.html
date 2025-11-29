@@ -47,7 +47,7 @@
         <h1>Trading Journal</h1>
         <div class="subtitle">Registro de operaciones</div>
       </div>
-      <div style="margin-left:auto" class="small muted">V1.2</div>
+      <div style="margin-left:auto" class="small muted">V1.3</div>
     </header>
 
     <div class="toolbar">
@@ -74,6 +74,7 @@
             <th>%</th>
             <th>Comentario</th>
             <th>Captura</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -184,7 +185,7 @@ async function cargarOperaciones(){
   if(error){ alert("Error cargando: "+error.message); return; }
   tbody.innerHTML = '';
   if(data.length===0){ 
-    tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; 
+    tbody.innerHTML='<tr><td colspan="16" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; 
     return; 
   }
   data.forEach(op=>{
@@ -204,6 +205,7 @@ async function cargarOperaciones(){
       <td>${op.porcentaje||''}</td>
       <td>${op.comentario||''}</td>
       <td><a href="${op.captura_url}" target="_blank">Ver</a></td>
+      <td><button class="deleteBtn" data-id="${op.id}">Eliminar</button></td>
     </tr>`;
   });
 }
@@ -289,6 +291,7 @@ form.addEventListener('submit', async (e)=>{
   cargarOperaciones();
 });
 
+// Export CSV
 exportCSV.addEventListener('click', async ()=>{
   const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:true});
   if(error){ alert('Error exportando CSV: '+error.message); return; }
@@ -303,8 +306,19 @@ exportCSV.addEventListener('click', async ()=>{
   URL.revokeObjectURL(a.href);
 });
 
+// Botón eliminar
+tbody.addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('deleteBtn')){
+    const id = e.target.dataset.id;
+    if(confirm("¿Estás seguro de eliminar esta operación?")){
+      const {error} = await db.from('operaciones').delete().eq('id', id);
+      if(error){ alert("Error eliminando: "+error.message); return; }
+      cargarOperaciones();
+    }
+  }
+});
+
 cargarOperaciones();
 </script>
 </body>
 </html>
-
