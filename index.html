@@ -17,23 +17,18 @@
     header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
     h1{font-size:20px;margin:0}
     .subtitle{color:var(--muted); font-size:13px}
-
     .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
     button{background:var(--accent);border:0;padding:8px 12px;border-radius:10px;color:#042027;cursor:pointer;font-weight:600}
     button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2)}
     button.ghost{background:transparent;border:0;color:var(--muted)}
-
     input, select, textarea{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:inherit;width:100%;}
-
     .card{background:var(--card); padding:14px; border-radius:12px; box-shadow: 0 6px 20px rgba(2,6,23,0.6)}
     table{width:100%; border-collapse:collapse; font-size:13px}
     thead th{ text-align:left; padding:12px 10px; color:var(--muted); font-weight:600; font-size:12px}
     tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
     .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
     .long{width:220px}
-
     @media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
-
     .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
     .modal{width:100%;max-width:720px;background:var(--glass);border-radius:12px;padding:16px;backdrop-filter: blur(6px);}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -47,7 +42,7 @@
         <h1>Trading Journal</h1>
         <div class="subtitle">Registro de operaciones</div>
       </div>
-      <div style="margin-left:auto" class="small muted">V1.4</div>
+      <div style="margin-left:auto" class="small muted">V1.5</div>
     </header>
 
     <div class="toolbar">
@@ -288,16 +283,23 @@ function calcularAutomatico(){
 
   const {pip, valorPorLote} = configDivisa[div];
 
+  // Beneficio Bruto
   let bruto = ((orden==='Buy') ? (salida-entrada) : (entrada-salida)) / pip * valorPorLote * lts;
   beneficioBruto.value = bruto.toFixed(2);
 
+  // Comisión
   let com = (comisionPorCuenta[cuenta] || 0) * lts;
   comision.value = com.toFixed(2);
 
+  // Beneficio Neto
   const neto = bruto - com;
   beneficioNeto.value = neto.toFixed(2);
 
-  porcentaje.value = ((neto / (entrada * lts)) *100).toFixed(2);
+  // Balance según tipo de cuenta
+  const balance = cuenta==='Apollo' ? 5000 : 1000;
+
+  // Porcentaje sobre balance
+  porcentaje.value = ((neto / balance)*100).toFixed(2);
 }
 
 form.addEventListener('submit', async (e)=>{
