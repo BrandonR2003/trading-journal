@@ -49,8 +49,61 @@
     <div class="toolbar">
       <button id="newBtn">+ Nueva operación</button>
       <button id="exportCSV" class="secondary">Exportar CSV</button>
+      <div style="margin-left:auto">
+      <button id="toggleFiltros" class="secondary">Filtros ▾</button>
+      </div>
     </div>
 
+    <div id="filtrosPanel" class="card" style="display:none; margin-top:10px; padding:12px;">
+  <strong style="font-size:14px">Filtros</strong>
+  <div style="margin-top:12px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px">
+
+    <label>
+      Por trader
+      <select id="filtrarTrader">
+        <option value="">Todos</option>
+      </select>
+    </label>
+
+    <label>
+      Por divisa
+      <select id="filtrarDivisa">
+        <option value="">Todas</option>
+      </select>
+    </label>
+
+    <label>
+      Tipo de orden
+      <select id="filtrarTipoOrden">
+        <option value="">Todos</option>
+      </select>
+    </label>
+
+    <label>
+      Cuenta
+      <select id="filtrarCuenta">
+        <option value="">Todas</option>
+      </select>
+    </label>
+
+    <label>
+      Desde fecha
+      <input id="filtrarDesde" type="date">
+    </label>
+
+    <label>
+      Hasta fecha
+      <input id="filtrarHasta" type="date">
+    </label>
+
+  </div>
+
+  <div style="display:flex; gap:10px; margin-top:14px">
+    <button id="aplicarFiltros">Aplicar</button>
+    <button id="limpiarFiltros" class="secondary">Limpiar</button>
+  </div>
+</div>
+    
     <div class="card">
       <table id="journalTable">
         <thead>
@@ -465,12 +518,123 @@ function exportarCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
+  // --- PANEL DE FILTROS ---
+const filtrosPanel = document.getElementById("filtrosPanel");
+const toggleFiltros = document.getElementById("toggleFiltros");
+
+toggleFiltros.addEventListener("click", () => {
+  filtrosPanel.style.display = filtrosPanel.style.display === "none" ? "block" : "none";
+});
+
+// Selects de filtros
+const filtrarTrader = document.getElementById("filtrarTrader");
+const filtrarDivisa = document.getElementById("filtrarDivisa");
+const filtrarTipoOrden = document.getElementById("filtrarTipoOrden");
+const filtrarCuenta = document.getElementById("filtrarCuenta");
+const filtrarDesde = document.getElementById("filtrarDesde");
+const filtrarHasta = document.getElementById("filtrarHasta");
+
+const aplicarFiltros = document.getElementById("aplicarFiltros");
+const limpiarFiltros = document.getElementById("limpiarFiltros");
+
+// --- SINCRONIZAR OPCIONES DEL MODAL CON FILTROS ---
+function copiarOpciones(origenSelect, destinoSelect) {
+  destinoSelect.innerHTML = `<option value="">Todos</option>`;
+  [...origenSelect.options].forEach(op => {
+    if (op.value !== "") {
+      const nuevo = document.createElement("option");
+      nuevo.value = op.value;
+      nuevo.textContent = op.textContent;
+      destinoSelect.appendChild(nuevo);
+    }
+  });
+}
+
+// Llenado inicial
+copiarOpciones(operador, filtrarTrader);
+copiarOpciones(divisaSelect, filtrarDivisa);
+copiarOpciones(tipo_orden, filtrarTipoOrden);
+copiarOpciones(tipo_cuenta, filtrarCuenta);
+
+let datosOriginales = [];
+
+// Sobrescribimos cargarOperaciones para guardar datos originales
+const cargarOperacionesOriginal = cargarOperaciones;
+cargarOperaciones = async function () {
+  await cargarOperacionesOriginal();
+  const { data } = await db.from("operaciones").select("*").order("id",{ascending:false});
+  datosOriginales = data || [];
+};
+
+// FILTRAR LOCAL
+function aplicarFiltroLocal() {
+  let filtrado = [...datosOriginales];
+
+  if (filtrarTrader.value) 
+    filtrado = filtrado.filter(op => op.operador === filtrarTrader.value);
+
+  if (filtrarDivisa.value) 
+    filtrado = filtrado.filter(op => op.divisa === filtrarDivisa.value);
+
+  if (filtrarTipoOrden.value) 
+    filtrado = filtrado.filter(op => op.tipo_orden === filtrarTipoOrden.value);
+
+  if (filtrarCuenta.value)
+    filtrado = filtrado.filter(op => op.tipo_cuenta === filtrarCuenta.value);
+
+  if (filtrarDesde.value)
+    filtrado = filtrado.filter(op => op.fecha >= filtrarDesde.value);
+
+  if (filtrarHasta.value)
+    filtrado = filtrado.filter(op => op.fecha <= filtrarHasta.value);
+
+  // Pintar tabla con datos filtrados
+  tbody.innerHTML = "";
+  if (filtrado.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;padding:20px;color:#94a3b8;">Sin resultados</td></tr>`;
+    return;
+  }
+
+  filtrado.forEach(op => {
+    tbody.innerHTML += `
+    <tr>
+      <td>${op.id}</td>
+      <td>${op.operador || ""}</td>
+      <td>${formatFecha(op.fecha)}</td>
+      <td>${op.divisa || ""}</td>
+      <td>${op.tipo_cuenta || ""}</td>
+      <td>${op.tipo_orden || ""}</td>
+      <td>${op.lotaje || ""}</td>
+      <td>${op.precio_entrada || ""}</td>
+      <td>${op.precio_salida || ""}</td>
+      <td>${formatUSD(op.beneficio_bruto)}</td>
+      <td>${formatUSD(op.comision)}</td>
+      <td>${formatUSD(op.beneficio_neto)}</td>
+      <td>${formatPorcentaje(op.porcentaje)}</td>
+      <td>${op.comentario || ""}</td>
+      <td>${op.captura_url ? `<a href="${op.captura_url}" target="_blank">Ver</a>` : ""}</td>
+      <td style="display:flex; gap:6px">
+        <button class="editBtn" data-id="${op.id}" style="background:var(--accent); padding:6px 12px; border-radius:8px; color:#042027; font-weight:600; cursor:pointer; width:32px; text-align:center;">✎</button>
+        <button class="deleteBtn" data-id="${op.id}" style="background:#ef4444; padding:6px 12px; border-radius:8px; color:white; cursor:pointer; width:32px; text-align:center;">×</button>
+      </td>
+    </tr>`;
+  });
+}
+
+aplicarFiltros.addEventListener("click", aplicarFiltroLocal);
+
+limpiarFiltros.addEventListener("click", () => {
+  filtrarTrader.value = "";
+  filtrarDivisa.value = "";
+  filtrarTipoOrden.value = "";
+  filtrarCuenta.value = "";
+  filtrarDesde.value = "";
+  filtrarHasta.value = "";
+  cargarOperaciones();
+});
   
 cargarOperaciones();
 </script>
 </body>
 </html>
-
-
-
-
