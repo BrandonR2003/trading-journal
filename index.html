@@ -8,7 +8,7 @@
   <style>
     :root {
       --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#06b6d4; --accent-2:#60a5fa; --danger:#fb7185;
-      --glass: rgba(15,23,36,0.95); /* menos transparente */
+      --glass: rgba(15,23,36,0.95);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
     *{box-sizing:border-box}
@@ -35,7 +35,7 @@
     @media (max-width:800px){ .container{padding:12px} table{font-size:12px} .long{width:120px} header{flex-direction:column;align-items:flex-start} }
 
     /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.95);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;}
     .modal{width:100%;max-width:720px;background:var(--glass);border-radius:12px;padding:16px;backdrop-filter: blur(6px);}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     @media (max-width:600px){.form-grid{grid-template-columns:1fr}}
@@ -90,63 +90,63 @@
         <div class="actions"><button id="closeModal" class="ghost">Cerrar</button></div>
       </div>
       <form id="form">
-        <div class="form-grid">
-          <label>
-            Operador
-            <select id="operador" required>
-              <option value="">Selecciona operador</option>
-              <option value="Brandon">Brandon</option>
-              <option value="Raul">Raul</option>
-            </select>
-          </label>
+  <div class="form-grid">
+    <label>
+      Operador
+      <select id="operador" required>
+        <option value="">Selecciona operador</option>
+        <option value="Brandon">Brandon</option>
+        <option value="Raul">Raul</option>
+      </select>
+    </label>
 
-          <label>
-            Fecha
-            <input id="fecha" type="date" required>
-          </label>
+    <label>
+      Fecha
+      <input id="fecha" type="date" required>
+    </label>
 
-          <label>
-            Divisa
-            <select id="divisa">
-              <option value="">Selecciona divisa</option>
-              <option value="EUR/USD">EUR/USD</option>
-              <option value="GBP/USD">GBP/USD</option>
-              <option value="USD/JPY">USD/JPY</option>
-              <option value="XAU/USD">XAU/USD</option>
-            </select>
-          </label>
+    <label>
+      Divisa
+      <select id="divisa">
+        <option value="">Selecciona divisa</option>
+        <option value="EUR/USD">EUR/USD</option>
+        <option value="GBP/USD">GBP/USD</option>
+        <option value="USD/JPY">USD/JPY</option>
+        <option value="XAU/USD">XAU/USD</option>
+      </select>
+    </label>
 
-          <label>
-            Tipo Cuenta
-            <select id="tipo_cuenta">
-              <option value="">Selecciona tipo</option>
-              <option value="Apollo">Apollo</option>
-              <option value="Personal">Personal</option>
-            </select>
-          </label>
+    <label>
+      Tipo Cuenta
+      <select id="tipo_cuenta">
+        <option value="">Selecciona tipo</option>
+        <option value="Apollo">Apollo</option>
+        <option value="Personal">Personal</option>
+      </select>
+    </label>
 
-          <label>
-            Tipo Orden
-            <select id="tipo_orden">
-              <option value="Buy">Buy</option>
-              <option value="Sell">Sell</option>
-            </select>
-          </label>
+    <label>
+      Tipo Orden
+      <select id="tipo_orden">
+        <option value="Buy">Buy</option>
+        <option value="Sell">Sell</option>
+      </select>
+    </label>
 
-          <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
-          <label>Precio Entrada <input id="precio_entrada" type="number" step="0.0001"></label>
-          <label>Precio Salida <input id="precio_salida" type="number" step="0.0001"></label>
-          <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01"></label>
-          <label>Comisión <input id="comision" type="number" step="0.01"></label>
-          <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01"></label>
-          <label>Porcentaje <input id="porcentaje" type="number" step="0.01"></label>
-          <label>Comentario <textarea id="comentario"></textarea></label>
-          <label>Captura URL <input id="captura_url" type="text"></label>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-          <button type="submit">Guardar Operación</button>
-        </div>
-      </form>
+    <label>Lotaje <input id="lotaje" type="number" step="0.01"></label>
+    <label>Precio Entrada <input id="precio_entrada" type="number" step="0.00001"></label>
+    <label>Precio Salida <input id="precio_salida" type="number" step="0.00001"></label>
+    <label>Beneficio Bruto <input id="beneficio_bruto" type="number" step="0.01"></label>
+    <label>Comisión <input id="comision" type="number" step="0.01"></label>
+    <label>Beneficio Neto <input id="beneficio_neto" type="number" step="0.01"></label>
+    <label>Porcentaje <input id="porcentaje" type="number" step="0.01"></label>
+    <label>Comentario <textarea id="comentario"></textarea></label>
+    <label>Captura URL <input id="captura_url" type="text"></label>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+    <button type="submit">Guardar Operación</button>
+  </div>
+</form>
     </div>
   </div>
 
@@ -162,33 +162,44 @@
   const tbody = document.getElementById('tbody');
   const exportCSV = document.getElementById('exportCSV');
 
+  const divisaInput = document.getElementById('divisa');
+  const precioEntrada = document.getElementById('precio_entrada');
+  const precioSalida = document.getElementById('precio_salida');
+
+  // Ajuste automático de decimales según divisa
+  function ajustarDecimales() {
+    const par = divisaInput.value;
+    let step = '0.00001'; // default 5 decimales
+    if(par === 'XAU/USD') step = '0.01'; // 2 decimales
+    precioEntrada.step = step;
+    precioSalida.step = step;
+    if(precioEntrada.value) precioEntrada.value = parseFloat(precioEntrada.value).toFixed(step==='0.01'?2:5);
+    if(precioSalida.value) precioSalida.value = parseFloat(precioSalida.value).toFixed(step==='0.01'?2:5);
+  }
+  divisaInput.addEventListener('change', ajustarDecimales);
+
+  // Formato de fecha dd/mm/yyyy
+  function formatoFecha(fecha) {
+    if(!fecha) return '';
+    const d = new Date(fecha);
+    if(isNaN(d)) return fecha;
+    return d.getDate().toString().padStart(2,'0') + '/' + (d.getMonth()+1).toString().padStart(2,'0') + '/' + d.getFullYear();
+  }
+
   newBtn.addEventListener('click', ()=>{ modal.style.display='flex'; form.reset(); });
   closeModal.addEventListener('click', ()=> modal.style.display='none');
   modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
-
-  // Función para mostrar fecha en formato dd/mm/yyyy
-  function formatFecha(fecha) {
-    if (!fecha) return "";
-    const d = new Date(fecha);
-    const dia = String(d.getDate()).padStart(2, '0');
-    const mes = String(d.getMonth() + 1).padStart(2, '0');
-    const año = d.getFullYear();
-    return `${dia}/${mes}/${año}`;
-  }
 
   async function cargarOperaciones(){
     const {data, error} = await db.from('operaciones').select('*').order('id',{ascending:false});
     if(error){ alert("Error cargando: "+error.message); return; }
     tbody.innerHTML = '';
-    if(data.length===0){ 
-      tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; 
-      return; 
-    }
+    if(data.length===0){ tbody.innerHTML='<tr><td colspan="15" style="text-align:center;padding:20px;color:#94a3b8;">Sin operaciones registradas</td></tr>'; return; }
     data.forEach(op=>{
       tbody.innerHTML += `<tr>
         <td>${op.id}</td>
         <td>${op.operador||''}</td>
-        <td>${formatFecha(op.fecha)}</td>
+        <td>${formatoFecha(op.fecha)}</td>
         <td>${op.divisa||''}</td>
         <td>${op.tipo_cuenta||''}</td>
         <td>${op.tipo_orden||''}</td>
